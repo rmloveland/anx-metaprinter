@@ -23,8 +23,7 @@
 
 (define *api-url* "http://sand.api.appnexus.com/")
 
-;;(define *wd* "/Users/rloveland/work/code/api")
-(define *wd* "/home/rml/Code/mathoms")
+(define *wd* (string-append (home-dir) "/Code/mathoms/anx-scheme-hacks"))
 
 (define *cache* (make-table))
 
