@@ -1,0 +1,11 @@
+ANX SCHEME HACKS
+
+A.K.A., Scsh hacking for fun and profit.
+
+Porting my Emacs Lisp code over to Scsh so that I can distribute
+little command-line apps to coworkers. Ideally they'll only have to
+type things like
+
+    $ print-meta 'publisher'
+
+to output pre-formatted tables for our wiki docs.
