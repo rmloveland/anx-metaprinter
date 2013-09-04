@@ -244,6 +244,10 @@ that need to be defined in their own tables."
 	  (anx/print-children children)))
   (error "`anx/print-meta' expects an vector of association lists")))
 
+(define (anx/really-print-meta sym)
+  (let ((meta (get-service-meta sym)))
+    (anx/print-meta (anx/extract-meta-fields meta))))
+
 ;; A real placement object for testing:
 
 (define placement-meta '((response
