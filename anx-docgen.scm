@@ -94,14 +94,6 @@ key-value pair."
    (cons 'default "")
    (cons 'required_on "")))
 
-;; FIXME: Is this procedure ever called? I can't find the call site.
-(define (anx/alistify-objects vector-of-alists) ;DONE
-  ;; Vector -> Vector
-  "Given an VECTOR-OF-ALISTS, return another vector in intermediate representation."
-  (vector-map (lambda (i json-object)
-		(anx/alistify-object json-object))
-	      vector-of-alists))
-
 (define (anx/process-stack-item xs)	;DONE
   ;; List -> List
   "Given a LIST, return an intermediate Lisp representation of the document.
@@ -182,14 +174,6 @@ that need to be defined in their own tables."
     (anx/stack-clear!)
     (list (list 'parent parent)
 	  (list 'children children))))
-
-;; FIXME: This doesn't seem to be called anywhere. Consider removing.
-(define (anx/parent:title document)	;DONE
-  ;; Alist -> String
-  "Given a Scheme DOCUMENT structure, return the title of the parent (main) table."
-  (car (alist/get-key 'text
-		      (alist/get-key 'title
-				     (car (alist/get-key 'parent document))))))
 
 (define (anx/extract-meta resp)		;DONE
   ;; String -> Vector (of Alists)
