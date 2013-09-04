@@ -51,7 +51,7 @@ key-value pair."
 
 (define (anx/vector-of-alists? object)	;DONE
   ;; Object -> Boolean
-  "Determine if OBJECT is an vector of association lists."
+  "Determine if OBJECT is a vector of association lists."
   (and (vector? object)
        (vector-every alist? object)))
 
@@ -191,8 +191,15 @@ that need to be defined in their own tables."
 		      (alist/get-key 'title
 				     (car (alist/get-key 'parent document))))))
 
+(define (anx/extract-meta resp)		;DONE
+  ;; String -> Vector (of Alists)
+  ""
+  (let* ((parsed (json/parse-string resp))
+	 (fields (alist/get-key 'fields (alist/get-key 'response parsed))))
+    fields))
+
 ;;--------------------------------------------------------------------
-;; FIXME: Rewrite these to print to STDOUT
+;; FIXME: Rewrite these to print wiki tables to STDOUT
 ;;--------------------------------------------------------------------
 
 (define (anx/print-to-scratch-buffer format-string)
@@ -269,7 +276,7 @@ that need to be defined in their own tables."
 			   (instance . "07.hbapi.sand-08.lax1"))
 			  (fields .
 				  #(((fields .
-					    #(((filter_by . #f)
+					     #(((filter_by . #f)
 					      (sort_by . #f)
 					      (type . "int")
 					      (name . "id"))
