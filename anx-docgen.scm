@@ -163,7 +163,7 @@ that need to be defined in their own tables."
 		     vector-of-alists))))
 
 (define *anx-standard-table-row*	;DONE
-  "| %s | %s | %s | %s | %s | %s | %s |\n")
+  "| ~A | ~A | ~A | ~A | ~A | ~A | ~A |~%")
 ;  "Format string for standard API wiki table rows."
 
 (define (anx/process-meta! vector-of-alists) ;DONE
@@ -175,7 +175,7 @@ that need to be defined in their own tables."
     (list (list 'parent parent)
 	  (list 'children children))))
 
-(define (anx/extract-meta resp)		;DONE
+(define (anx/extract-meta-fields resp)		;DONE
   ;; String -> Vector (of Alists)
   ""
   (let* ((parsed (json/parse-string resp))
@@ -186,55 +186,57 @@ that need to be defined in their own tables."
 ;; FIXME: Rewrite these to print wiki tables to STDOUT
 ;;--------------------------------------------------------------------
 
-(define (anx/print-to-scratch-buffer format-string)
-  ;; -> IO
-  "Print FORMAT-STRING to the *scratch* buffer."
-  (princ format-string
-	 (get-buffer "*scratch*")))
-
-(define (anx/print-parent parent-alist)
+(define (anx/print-parent parent-alist)	;DONE
   ;; Alist -> IO
   "Given PARENT-ALIST, print its documentation table."
   (anx/print-parent-or-child parent-alist))
 
-(define (anx/print-children children)
+(define (anx/print-children children)	;DONE
   ;; List -> IO
   "Given a list CHILDREN, print each of their documentation tables."
-  (mapc (lambda (x) (anx/print-parent x))
+  (for-each (lambda (x) (anx/print-parent x))
 	children))
 
-(define (anx/print-parent-or-child parent-or-child-alist)
+(define (anx/print-parent-or-child parent-or-child-alist) ;DONE
   ;; Alist -> IO
   "Given a PARENT-OR-CHILD-ALIST, print an API documentation table from it."
   (let ((title (second (car (alist/get-key 'title parent-or-child-alist))))
 	(columns *anx-standard-table-header*)
 	(rows (alist/get-key 'rows parent-or-child-alist)))
-    (progn (anx/print-to-scratch-buffer (format "\nh2. %s\n\n" title))
-	   (anx/print-to-scratch-buffer
-	    (format "%s\n"
-		    (concat "|| " (mapconcat
-				   (lambda (x) x)
-				   *anx-standard-table-header* " || ") " ||")))
-	   (mapc (lambda (row)
-		   (anx/print-to-scratch-buffer
-		    (format *anx-standard-table-row*
-			    (alist/get-key 'name row)
-			    (alist/get-key 'type row)
-			    (alist/get-key 'sort_by row)
-			    (alist/get-key 'filter_by row)
-			    (alist/get-key 'description row)
-			    (alist/get-key 'default row)
-			    (alist/get-key 'required_on row))))
-		 rows))))
+    (begin (format #t "~%h2. ~A~%~%" title)
+	   (format #t (string-append "|| "
+				     (string-join *anx-standard-table-header* " || ")
+				     " ||\n"))
+	   (if (vector? rows)
+	       (vector-for-each (lambda (i row)
+				  (format #t *anx-standard-table-row*
+					  (alist/get-key 'name row)
+					  (alist/get-key 'type row)
+					  (alist/get-key 'sort_by row)
+					  (alist/get-key 'filter_by row)
+				      (alist/get-key 'description row)
+				      (alist/get-key 'default row)
+				      (alist/get-key 'required_on row)))
+				rows)
+	       (for-each (lambda (row)
+			   (format #t *anx-standard-table-row*
+				   (alist/get-key 'name row)
+				   (alist/get-key 'type row)
+				   (alist/get-key 'sort_by row)
+				   (alist/get-key 'filter_by row)
+				   (alist/get-key 'description row)
+				   (alist/get-key 'default row)
+				   (alist/get-key 'required_on row)))
+			 rows)))))
 
-(define (anx/print-meta vector-of-alists)
+(define (anx/print-meta vector-of-alists) ;DONE
   ;; Vector -> IO State!
   "Given an VECTOR-OF-ALISTS, print documentation tables from it."
   (if (anx/vector-of-alists? vector-of-alists)
       (let* ((ir (anx/process-meta! vector-of-alists))
 	     (parent (car (alist/get-key 'parent ir)))
 	     (children (car (alist/get-key 'children ir))))
-	(progn
+	(begin
 	  (anx/stack-clear!)
 	  (anx/process-objects vector-of-alists)
 	  (anx/process-stack-items!)
