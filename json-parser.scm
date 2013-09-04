@@ -181,11 +181,11 @@
    (else (parse-error token))))
 
 (define (parse-map)
-  (let loop ((res '(map)))
+  (let loop ((res '()))
     (let ((token (next-token)))
       (cond
        ((eqv? token 'close-curly) (reverse res))
-       ((string? token) (let* ((res (cons (list (string->symbol token) (parse-map-value))
+       ((string? token) (let* ((res (cons (cons (string->symbol token) (parse-map-value))
                                           res))
                                (next (next-token)))
                           (cond
@@ -201,14 +201,14 @@
         (parse-error token))))
 
 (define (parse-list)
-  (let loop ((res '(list)))
+  (let loop ((res '()))
     (let ((token (next-token)))
       (cond
-       ((eqv? token 'close-brace) (reverse res))
-       (else (let* ((res (cons (list 'item (parse-object-helper token)) res))
+       ((eqv? token 'close-brace) (list->vector (reverse res)))
+       (else (let* ((res (cons (parse-object-helper token) res))
                     (next (next-token)))
                (cond
-                ((eqv? next 'close-brace) (reverse res))
+                ((eqv? next 'close-brace) (list->vector (reverse res)))
                 ((eqv? next 'comma) (loop res))
                 (else (parse-error next)))))))))
 
