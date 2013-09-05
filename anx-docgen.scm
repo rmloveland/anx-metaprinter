@@ -6,17 +6,25 @@
 ;;;; have already loaded the other files in this directory so you can
 ;;;; use their exported bindings, many of which are used below.
 
-;; (define-structure anx-docgen
-;;     (export
-;;      )
-;;   (open 
-;;    scheme 
-;;    scsh
-;;    srfi-1
-;;    srfi-13  ; string-upcase
-;;    )
-;;   (files anx-utils vector-lib)
-;;   (begin
+;;--------------------------------------------------------------------
+;;                       Interface Definition
+;;--------------------------------------------------------------------
+
+(define-interface anx-docgen-interface
+  (export anx/really-print-meta))
+
+(define-structure anx-docgen anx-docgen-interface
+  (open 
+   scheme 
+   scsh
+   srfi-1
+   srfi-13  ; STRING-UPCASE, STRING-JOIN
+   tables)
+  (files anx-api
+	 anx-utils
+	 vector-lib
+	 json-parser)
+  (begin
 
 ;;; Part 1. Standard API Services
 
@@ -181,10 +189,6 @@ that need to be defined in their own tables."
   (let* ((parsed (json/parse-string resp))
 	 (fields (alist/get-key 'fields (alist/get-key 'response parsed))))
     fields))
-
-;;--------------------------------------------------------------------
-;; FIXME: Rewrite these to print wiki tables to STDOUT
-;;--------------------------------------------------------------------
 
 (define (anx/print-parent parent-alist)	;DONE
   ;; Alist -> IO
@@ -665,6 +669,6 @@ that need to be defined in their own tables."
 
 ;; FIXME: TBD.
 
-;;))
+))
 
 ;; anx-docgen.scm ends here

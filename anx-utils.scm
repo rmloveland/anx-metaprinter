@@ -4,12 +4,8 @@
 (define-structure anx-utils
     (export
      (push! :syntax)
-     (pop! :syntax)
-     )
-  (open 
-   scheme
-   scsh
-   )
+     (pop! :syntax))
+  (open scheme scsh)
   (begin
 
 (define-syntax push!
