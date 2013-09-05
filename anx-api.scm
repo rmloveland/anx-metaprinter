@@ -55,6 +55,8 @@
 
 (define (get-service-meta service)
   (let ((it (safe-symbol->string service)))
+    (if (not (logged-in?))
+	(error "Not logged in. Run `(auth)'."))
     (or
      (table-ref *cache* service)
      (let ((str (with-cwd *wd*
