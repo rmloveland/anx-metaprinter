@@ -12,13 +12,8 @@
      logged-in?
      get-service-meta
      safe-symbol->string
-     get-report-meta
-     )
-  (open 
-   scheme 
-   scsh
-   tables
-   )
+     get-report-meta)
+  (open scheme scsh tables)
   (begin
 
 (define *api-url* "http://sand.api.appnexus.com/")
