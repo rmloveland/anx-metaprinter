@@ -47,14 +47,12 @@
 
 ;;; * Conversion
      vector->list                    reverse-vector->list
-     list->vector                    reverse-list->vector
-     )
+     list->vector                    reverse-list->vector)
   (open
    scheme
    scsh
    srfi-8
-   srfi-23
-   )
+   srfi-23)
   (begin
 
 
