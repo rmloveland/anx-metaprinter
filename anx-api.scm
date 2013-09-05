@@ -34,6 +34,10 @@
         #t
         #f)))
 
+(define (clear-api-cache!)
+  (table-walk (lambda (k v)
+		(table-set! *cache* k #f)) *cache*))
+
 (define (auth)
   (with-cwd *wd*
     (let ((response (run/string (curl -b cookies 
