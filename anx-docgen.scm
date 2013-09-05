@@ -10,20 +10,43 @@
 ;;                       Interface Definition
 ;;--------------------------------------------------------------------
 
-(define-interface anx-docgen-interface
-  (export anx/really-print-meta))
-
-(define-structure anx-docgen anx-docgen-interface
+(define-structure anx-docgen
+  (export anx/really-print-meta
+	  *anx-json-stack*
+	  alist?
+	  alist/get-keys
+	  alist/get-key
+	  anx/vector-of-alists?
+	  anx/stack-push!
+	  anx/stack-pop!	
+	  anx/stack-empty?	
+	  anx/stack-clear!	
+	  anx/translate-boolean
+	  anx/alistify-object
+	  anx/process-stack-item
+	  anx/process-stack-items!
+	  anx/object-has-fields?
+	  anx/save-fields-for-later!
+	  anx/process-object
+	  *anx-standard-table-header*
+	  anx/process-objects
+	  *anx-standard-table-row*
+	  anx/process-meta!
+	  anx/extract-meta-fields
+	  anx/print-parent
+	  anx/print-children
+	  anx/print-parent-or-child
+	  anx/print-meta)
   (open 
    scheme 
    scsh
    srfi-1
    srfi-13  ; STRING-UPCASE, STRING-JOIN
-   tables)
-  (files anx-api
-	 anx-utils
-	 vector-lib
-	 json-parser)
+   anx-api
+   anx-utils
+   json-parser
+   vector-lib
+   )
   (begin
 
 ;;; Part 1. Standard API Services
