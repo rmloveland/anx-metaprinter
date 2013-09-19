@@ -9,3 +9,22 @@ type things like
     $ print-meta 'publisher'
 
 to output pre-formatted tables for our wiki docs.
+
+GETTING STARTED
+
+First, create the directory ~/bin/metaprinter.
+
+Then, create a file `auth' in that directory, which will hold your
+JSON login credentials, e.g.,
+
+{
+    "auth": {
+        "password": "FOOBAR",
+        "username": "rloveland"
+    }
+}
+
+After you save that file, change its permissions so no one else can read your password like so:
+
+$ chmod 600 auth
+
