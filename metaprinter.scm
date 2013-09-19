@@ -230,54 +230,54 @@ that need to be defined in their own tables."
 ;;--------------------------------------------------------------------
 ;; Part 2. Reporting APIs
 
-;; (defvar *anx-report-dimensions-table-header*
-;;   '("Column" "Type" "Filter?" "Description")
-;;   "Titles for reporting API dimensions columns.")
+;; Titles for reporting API dimensions columns.
+(define *anx-report-dimensions-table-header*
+  '("Column" "Type" "Filter?" "Description"))
 
-;; (defvar *anx-report-dimensions-table-row*
-;;   "| %s | %s | %s | %s |\n"
-;;   "Format string for reporting API dimensions rows.")
+;; Format string for reporting API dimensions rows.
+(define *anx-report-dimensions-table-row*
+  "| %s | %s | %s | %s |\n")
 
-;; (defvar *anx-report-metrics-table-header*
-;;   '("Column" "Type" "Formula" "Description")
-;;   "Titles for reporting API Metrics columns.")
+;; Titles for reporting API Metrics columns.
+(define *anx-report-metrics-table-header*
+  '("Column" "Type" "Formula" "Description"))
 
-;; (defvar *anx-report-metrics-table-row*
-;;   "| %s | %s | %s | %s |\n"
-;;   "Format string for reporting API metrics rows.")
+;; Format string for reporting API metrics rows.
+(define *anx-report-metrics-table-row*
+  "| %s | %s | %s | %s |\n")
 
-;; (defvar *anx-havings-hash* (make-hash-table :test 'equal)
-;;   "Record the existence of 'column' fields from the 'havings' array.")
+;; Record the existence of 'column' fields from the 'havings' array.
+(define *anx-havings-table* (make-table))
 
-;; (defvar *anx-filters-hash* (make-hash-table :test 'equal)
-;;   "Associate 'column' and 'type' fields from the 'filters' array.")
+;; Associate 'column' and 'type' fields from the 'filters' array.
+(define *anx-filters-table* (make-table))
 
-;; (defvar *anx-columns-hash* (make-hash-table :test 'equal)
-;;   "Associate 'column' and 'type' fields from the 'columns' array.")
+;; Associate 'column' and 'type' fields from the 'columns' array.
+(define *anx-columns-table* (make-table))
 
-;; (defun anx-build-columns-hash (report-meta-alist)
+;; (defun anx-build-columns-table (report-meta-alist)
 ;;   ;; Array -> State!
-;;   "Given REPORT-META-ALIST, builds *anx-columns-hash* from it."
+;;   "Given REPORT-META-ALIST, builds *anx-columns-table* from it."
 ;;   (mapc (lambda (alist)
 ;; 	  (puthash (anx-assoc-val 'column alist)
 ;; 		   (anx-assoc-val 'type alist)
-;; 		   *anx-columns-hash*))
+;; 		   *anx-columns-table*))
 ;; 	(anx-assoc-val 'columns report-meta-alist)))
 
-;; (defun anx-build-filters-hash (report-meta-alist)
+;; (defun anx-build-filters-table (report-meta-alist)
 ;;   ;; Array -> State!
-;;   "Given REPORT-META-ALIST, builds *anx-filters-hash* from it."
+;;   "Given REPORT-META-ALIST, builds *anx-filters-table* from it."
 ;;   (mapc (lambda (alist)
 ;; 	  (puthash (anx-assoc-val 'column alist)
 ;; 		   (anx-assoc-val 'type alist)
-;; 		   *anx-filters-hash*))
+;; 		   *anx-filters-table*))
 ;; 	(anx-assoc-val 'filters report-meta-alist)))
 
-;; (defun anx-build-havings-hash (report-meta-alist)
+;; (defun anx-build-havings-table (report-meta-alist)
 ;;   ;; Array -> State!
-;;   "Given REPORT-META-ALIST, builds *anx-havings-hash* from it."
+;;   "Given REPORT-META-ALIST, builds *anx-havings-table* from it."
 ;;   (mapc (lambda (alist)
-;; 	  (puthash (anx-assoc-val 'column alist) t *anx-havings-hash*))
+;; 	  (puthash (anx-assoc-val 'column alist) t *anx-havings-table*))
 ;; 	(anx-assoc-val 'havings report-meta-alist)))
 
 ;; (defun anx-build-dimensions-list ()
@@ -286,9 +286,9 @@ that need to be defined in their own tables."
 ;; In other words, return only the dimensions and not the metrics."
 ;;   (let ((results nil))
 ;;     (maphash (lambda (k v)
-;; 	       (unless (gethash k *anx-havings-hash*)
+;; 	       (unless (gethash k *anx-havings-table*)
 ;; 		 (push k results)))
-;; 	     *anx-columns-hash*)
+;; 	     *anx-columns-table*)
 ;;     (reverse results)))
 
 ;; (defun anx-build-metrics-list ()
@@ -297,7 +297,7 @@ that need to be defined in their own tables."
 ;;   (let ((results nil))
 ;;     (maphash (lambda (k v)
 ;; 		 (push k results))
-;; 	     *anx-havings-hash*)
+;; 	     *anx-havings-table*)
 ;;     (reverse results)))
 
 ;; (defun anx-process-dimensions-and-metrics ()
@@ -341,14 +341,14 @@ that need to be defined in their own tables."
 ;;   ;; String -> Boolean
 ;;   "Given report column ITEM, determine if it can be a reporting filter.
 ;; Use `anx-translate-boolean' to create a representation suitable for printing."
-;;   (if (gethash item *anx-filters-hash*)
+;;   (if (gethash item *anx-filters-table*)
 ;;       t
 ;;     nil))
 
 ;; (defun anx-get-column-type (item)
 ;;   ;; String -> String
 ;;   "Given report column ITEM, return its type."
-;;   (gethash item *anx-columns-hash*))
+;;   (gethash item *anx-columns-table*))
 
 ;; (defun anx-print-dimensions-table ()
 ;;   ;; -> IO
@@ -400,12 +400,12 @@ that need to be defined in their own tables."
 ;; Along the way, sets up and tears down hash tables to hold the
 ;; necessary state."
 ;;   (progn
-;;     (anx-build-columns-hash report-meta-alist)
-;;     (anx-build-filters-hash report-meta-alist)
-;;     (anx-build-havings-hash report-meta-alist)
+;;     (anx-build-columns-table report-meta-alist)
+;;     (anx-build-filters-table report-meta-alist)
+;;     (anx-build-havings-table report-meta-alist)
 ;;     (anx-print-dimensions-table)
 ;;     (anx-print-metrics-table)
-;;     (anx-clear-report-hashes)))
+;;     (anx-clear-report-tables)))
 
 ;; (defun anx-really-print-report-meta ()
 ;;   ;; -> IO State!
@@ -415,12 +415,12 @@ that need to be defined in their own tables."
 ;;   (let ((report-meta (read (buffer-string))))
 ;;     (anx-print-report-meta report-meta)))
 
-;; (defun anx-clear-report-hashes ()
+;; (defun anx-clear-report-tables ()
 ;;   ;; -> State!
 ;;   "Clear state hash tables used to generate documentation for reporting APIs."
-;;   (progn (clrhash *anx-havings-hash*)
-;; 	 (clrhash *anx-columns-hash*)
-;; 	 (clrhash *anx-filters-hash*)))
+;;   (progn (clrhash *anx-havings-table*)
+;; 	 (clrhash *anx-columns-table*)
+;; 	 (clrhash *anx-filters-table*)))
 
 ;;--------------------------------------------------------------------
 ;; The main Scsh executable.
