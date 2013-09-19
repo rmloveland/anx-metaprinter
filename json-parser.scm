@@ -1,16 +1,8 @@
-;;;; -*- mode: scheme48; scheme48-package: json-parser -*-
+;;;; -*- External-Scheme -*-
 ;;;; json-parser.scm --- A JSON parser for Scsh.
 ;;;; Original (c) Jörn Horstmann (http://blog.planetxml.de/)
-;;;; Scsh translation (c) Rich Loveland
+;;;; Scsh translation and further customization (c) 2013 Rich Loveland
 
-(define-structure json-parser (export
-			       json/parse
-			       json/parse-string
-			       json/parse-file
-			       parse-object)
-  (open scheme scsh)
-  (begin
-	    
 (define (json/parse p)
   (set-current-input-port! p)
   (parse-object))
@@ -211,7 +203,5 @@
                 ((eqv? next 'close-brace) (list->vector (reverse res)))
                 ((eqv? next 'comma) (loop res))
                 (else (parse-error next)))))))))
-
-))
 
 ;; json-parser.scm ends here
