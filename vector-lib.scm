@@ -1,60 +1,9 @@
-;;;;;; SRFI 43: Vector library -*- mode: scheme48; scheme48package: vector-lib -*-
+;;;;;; SRFI 43: Vector library -*- mode: scheme48 -*-
 ;;;
 ;;; $Id: vector-lib.scm,v 1.7 2009/03/29 09:46:03 sperber Exp $
 ;;;
 ;;; Taylor Campbell wrote this code; he places it in the public domain.
 ;;; Will Clinger [wdc] made some corrections, also in the public domain.
-
-(define-structure vector-lib
-    (export
-;;; --------------------
-;;; Exported procedure index
-;;;
-;;; * Constructors
-     make-vector vector
-     vector-unfold                   vector-unfold-right
-     vector-copy                     vector-reverse-copy
-     vector-append                   vector-concatenate
-
-;;; * Predicates
-     vector?
-     vector-empty?
-     vector=
-
-;;; * Selectors
-     vector-ref
-     vector-length
-
-;;; * Iteration
-     vector-fold                     vector-fold-right
-     vector-map                      vector-map!
-     vector-for-each
-     vector-count
-
-;;; * Searching
-     vector-index                    vector-skip
-     vector-index-right              vector-skip-right
-     vector-binary-search
-     vector-any                      vector-every
-
-;;; * Mutators
-     vector-set!
-     vector-swap!
-     vector-fill!
-     vector-reverse!
-     vector-copy!                    vector-reverse-copy!
-     vector-reverse!
-
-;;; * Conversion
-     vector->list                    reverse-vector->list
-     list->vector                    reverse-list->vector)
-  (open
-   scheme
-   scsh
-   srfi-8
-   srfi-23)
-  (begin
-
 
 ;;; --------------------
 ;;; Commentary on efficiency of the code
@@ -1321,5 +1270,3 @@
                 (error "erroneous value"
                        (list list? lst)
                        `(while calling ,reverse-list->vector)))))))))
-
-))
