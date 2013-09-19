@@ -1,42 +1,43 @@
-;;;; -*- mode: scheme48; scheme48-package: anx-api -*-
+;;;; -*- mode: scheme48 -*-
 ;;;; anx-api.scm --- Simple Scsh wrapper for the AppNexus API.
 
-(define-structure anx-api 
-    (export
-     *api-url*
-     *wd*
-     *cache*
-     *logged-in*
-     auth
-     status-ok?
-     logged-in?
-     get-service-meta
-     safe-symbol->string
-     get-report-meta)
-  (open scheme scsh tables)
-  (begin
-
-(define *api-url* "http://sand.api.appnexus.com/")
-
-(define *wd* (string-append (home-dir) "/Code/mathoms/anx-scheme-hacks"))
-
+(define *api-url* "http://api.appnexus.com/")
+(define *wd* (string-append (home-dir) "/bin/.metaprinter"))
 (define *cache* (make-table))
-
 (define *logged-in* #f)
+(define *auth-timestamp* #f)
+(define *debug* #f)
 
 (define (logged-in?)
-  *logged-in*)
+  (and *logged-in*
+       (not (<= (+ *auth-timestamp* 3600) ; API login lasts 2 hours.
+		(time)))))
+
+(define (set-logged-in!)
+  (begin (set! *logged-in* #t)
+	 (set! *auth-timestamp* (time))))
+
+(define (unset-logged-in!)
+  (begin (set! *logged-in* #f)
+	 (set! *auth-timestamp* #f)))
 
 (define (status-ok? service-response)
   (let* ((status-ok (rx "\"status\":\"OK\""))
 	 (m (regexp-search status-ok service-response)))
-    (if (string=? (match:substring m) "\"status\":\"OK\"")
+    (if (and m
+	     (string=? (match:substring m) "\"status\":\"OK\""))
         #t
         #f)))
 
-(define (clear-api-cache!)
+(define (cache-clear!)
   (table-walk (lambda (k v)
 		(table-set! *cache* k #f)) *cache*))
+
+(define (cache-ref k)
+  (table-ref *cache* k))
+
+(define (cache-set! k v)
+  (table-set! *cache* k v))
 
 (define (auth)
   (with-cwd *wd*
@@ -48,43 +49,30 @@
                                       ,(string-append *api-url*
                                                       "auth")))))
       (if (status-ok? response)
-          (begin (set! *logged-in* #t)
-		 (table-set! *cache* 'auth response)
-                 #t)
-          #f))))
+	  (begin (set-logged-in!)
+		 (display response)
+		 (newline)
+		 #t)
+	  (begin (display response)
+		 (newline)
+		 #f)))))
 
 (define (get-service-meta service)
   (let ((it (safe-symbol->string service)))
     (if (not (logged-in?))
-	(error "Not logged in. Run `(auth)'."))
-    (or
-     (table-ref *cache* service)
-     (let ((str (with-cwd *wd*
-		  (run/string
-		   (curl -b cookies
-			 ,(string-append *api-url* "/" it "/meta"))))))
-       (begin
-	 (table-set! *cache* service str)
-	 str)))))
-       
-(define (get-report-meta report)
-  (let ((it (safe-symbol->string report)))
-    (or
-     (table-ref *cache* report)
-     (let ((str
-	    (with-cwd *wd*
-	      (run/string
-	       (curl -b cookies
-		     ,(string-append *api-url* "/report?meta=" it))))))
-       (begin
-	 (table-set! *cache* report str)
-	 str)))))
+	(begin 
+	  (format #t "Have to log in again, just a moment...~%")
+	  (auth)
+	       (get-service-meta service))
+	(let ((str (with-cwd *wd*
+		     (run/string
+		      (curl -b cookies
+			    ,(string-append *api-url* "/" it "/meta"))))))
+	  str))))
 
 (define (safe-symbol->string x)
   (cond ((string? x) x)
 	((symbol? x)
 	 (symbol->string x))))
-
-))
 
 ;; anx-api.scm ends here
