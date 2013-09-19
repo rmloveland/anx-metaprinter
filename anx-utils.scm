@@ -1,12 +1,5 @@
-;;;; -*- mode: scheme48; scheme48-package: anx-utils -*-
+;;;; -*- mode: scheme48 -*-
 ;;;; anx-utils.scm --- Various utilities.
-
-(define-structure anx-utils
-    (export
-     (push! :syntax)
-     (pop! :syntax))
-  (open scheme scsh)
-  (begin
 
 (define-syntax push!
   (syntax-rules ()
@@ -20,5 +13,3 @@
      (let ((result (car seq)))
        (begin (set! seq (cdr seq))
               result)))))
-
-))
