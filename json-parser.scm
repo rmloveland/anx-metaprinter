@@ -1,7 +1,6 @@
-;;;; -*- External-Scheme -*-
-;;;; json-parser.scm --- A JSON parser for Scsh.
+;;;; json-parser.scm --- A JSON parser for Scsh.     -*- mode: scheme48 -*-
 ;;;; Original (c) Jörn Horstmann (http://blog.planetxml.de/)
-;;;; Scsh translation and further customization (c) 2013 Rich Loveland
+;;;; Scsh translation and further customizations (c) 2013 Rich Loveland
 
 (define (json/parse p)
   (set-current-input-port! p)
