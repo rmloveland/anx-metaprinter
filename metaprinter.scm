@@ -295,75 +295,76 @@ that need to be defined in their own tables."
 				 #t))
 		   (alist/get-key 'havings report-meta-alist)))
 
-;; (defun anx-build-dimensions-list ()
-;;   ;; -> List
-;;   "Builds a list from elements of 'columns' that are not also in 'havings'.
-;; In other words, return only the dimensions and not the metrics."
-;;   (let ((results nil))
-;;     (maphash (lambda (k v)
-;; 	       (unless (gethash k *anx-havings-table*)
-;; 		 (push k results)))
-;; 	     *anx-columns-table*)
-;;     (reverse results)))
+(define (anx/build-dimensions-list)
+  ;; -> List
+  "Builds a list from elements of 'columns' that are not also in 'havings'.
+In other words, return only the dimensions and not the metrics."
+  (let ((results '()))
+    (table-walk (lambda (k v)
+		  (if (not (table-ref *anx-havings-table* k))
+		      (push! k results)))
+		*anx-columns-table*)
+    (reverse results)))
 
-;; (defun anx-build-metrics-list ()
-;;   ;; -> List
-;;   "Builds a list from elements of 'havings', a.k.a. the metrics."
-;;   (let ((results nil))
-;;     (maphash (lambda (k v)
-;; 		 (push k results))
-;; 	     *anx-havings-table*)
-;;     (reverse results)))
+(define (anx/build-metrics-list)
+  ;; -> List
+  "Builds a list from elements of 'havings', a.k.a. the metrics."
+  (let ((results '()))
+    (table-walk (lambda (k v)
+		  (push! k results))
+		*anx-havings-table*)
+    (reverse results)))
 
-;; (defun anx-process-dimensions-and-metrics ()
-;;   ;; -> Alist
-;;   "Given lists DIMENSIONS and METRICS, return an alist."
-;;   (let ((dimensions (anx-process-dimensions))
-;; 	(metrics (anx-process-metrics)))
-;;     (list dimensions metrics)))
+(define (anx/get-column-type item)
+  ;; String -> String
+  "Given report column ITEM, return its type."
+  (table-ref *anx-columns-table* item))
 
-;; (defun anx-process-dimensions ()
-;;   ;; -> List
-;;   "Return a Lisp list representation of the report dimensions."
-;;   (list 'dimensions
-;; 	(list 'title
-;; 	      (list 'text "Dimensions"))
-;; 	(list 'header *anx-report-dimensions-table-header*)
-;; 	(list 'items
-;; 	      (mapcar (lambda (elem)
-;; 			(list (cons 'name elem)
-;; 			      (cons 'type (anx-get-column-type elem))
-;; 			      (cons 'filter_by (anx-translate-boolean (anx-report-filter-p elem)))
-;; 			      (cons 'description "")))
-;; 		      (anx-build-dimensions-list)))))
+(define (anx/report-filter? item)
+  ;; String -> Boolean
+  "Given report column ITEM, determine if it can be a reporting filter.
+Use `anx-translate-boolean' to create a representation suitable for printing."
+  (if (table-ref *anx-filters-table* item)
+      #t
+      #f))
 
-;; (defun anx-process-metrics ()
-;;   ;; -> List
-;;   "Return a Lisp list representation of the report metrics."
-;;   (list 'metrics
-;; 	(list 'title
-;; 	      (list 'text "Metrics"))
-;; 	(list 'header *anx-report-metrics-table-header*) ; column type formula description
-;; 	(list 'items
-;; 	      (mapcar (lambda (elem)
-;; 			(list (cons 'name elem)
-;; 			      (cons 'type (anx-get-column-type elem))
-;; 			      (cons 'formula "")
-;; 			      (cons 'description "")))
-;; 		      (anx-build-metrics-list)))))
+(define (anx/process-dimensions)
+  ;; -> List
+  "Return a Lisp list representation of the report dimensions."
+  (list 'dimensions
+	(list 'title
+	      (list 'text "Dimensions"))
+	(list 'header *anx-report-dimensions-table-header*)
+	(list 'items
+	      (map (lambda (elem)
+		     (list (cons 'name elem)
+			   (cons 'type (anx/get-column-type elem))
+			   (cons 'filter_by (anx/translate-boolean
+					     (anx/report-filter? elem)))
+			   (cons 'description "")))
+		   (anx/build-dimensions-list)))))
 
-;; (defun anx-report-filter-p (item)
-;;   ;; String -> Boolean
-;;   "Given report column ITEM, determine if it can be a reporting filter.
-;; Use `anx-translate-boolean' to create a representation suitable for printing."
-;;   (if (gethash item *anx-filters-table*)
-;;       t
-;;     nil))
+(define (anx/process-metrics)
+  ;; -> List
+  "Return a Lisp list representation of the report metrics."
+  (list 'metrics
+	(list 'title
+	      (list 'text "Metrics"))
+	(list 'header *anx-report-metrics-table-header*) ; column type formula description
+	(list 'items
+	      (map (lambda (elem)
+		     (list (cons 'name elem)
+			   (cons 'type (anx/get-column-type elem))
+			   (cons 'formula "")
+			   (cons 'description "")))
+		   (anx-build-metrics-list)))))
 
-;; (defun anx-get-column-type (item)
-;;   ;; String -> String
-;;   "Given report column ITEM, return its type."
-;;   (gethash item *anx-columns-table*))
+(define (anx/process-dimensions-and-metrics)
+  ;; -> Alist
+  "Given lists DIMENSIONS and METRICS, return an alist."
+  (let ((dimensions (anx/process-dimensions))
+	(metrics (anx/process-metrics)))
+    (list dimensions metrics)))
 
 ;; (defun anx-print-dimensions-table ()
 ;;   ;; -> IO
