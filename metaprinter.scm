@@ -236,7 +236,7 @@ that need to be defined in their own tables."
 
 ;; Format string for reporting API dimensions rows.
 (define *anx-report-dimensions-table-row*
-  "| %s | %s | %s | %s |\n")
+  "| ~A | ~A | ~A | ~A |~%")
 
 ;; Titles for reporting API Metrics columns.
 (define *anx-report-metrics-table-header*
@@ -244,7 +244,7 @@ that need to be defined in their own tables."
 
 ;; Format string for reporting API metrics rows.
 (define *anx-report-metrics-table-row*
-  "| %s | %s | %s | %s |\n")
+  "| ~A | ~A | ~A | ~A |~%")
 
 ;; Record the existence of 'column' fields from the 'havings' array.
 (define *anx-havings-table* (make-table))
@@ -366,77 +366,75 @@ Use `anx-translate-boolean' to create a representation suitable for printing."
 	(metrics (anx/process-metrics)))
     (list dimensions metrics)))
 
-;; (defun anx-print-dimensions-table ()
-;;   ;; -> IO
-;;   "Print a table of the report's dimensions in the *scratch* buffer."
-;;   (let* ((dimensions (anx-process-dimensions))
-;; 	 (items (car (alist/get-key 'items dimensions)))
-;; 	 (title (cadar (alist/get-key 'title dimensions)))
-;; 	 (header (car (alist/get-key 'header (anx-process-dimensions))))
-;; 	 (header-string
-;; 	  (concat "|| " (mapconcat
-;; 			 (lambda (x) x)
-;; 			 header " || ") " ||")))
-;;     (anx-print-to-scratch-buffer (format "\nh2. %s\n\n" title))
-;;     (anx-print-to-scratch-buffer (format "%s\n" header-string))
-;;     (mapc (lambda (elem)
-;; 	    (anx-print-to-scratch-buffer
-;; 	     (format *anx-report-dimensions-table-row*
-;; 		     (alist/get-key 'name elem)
-;; 		     (alist/get-key 'type elem)
-;; 		     (anx-translate-boolean (alist/get-key 'filter_by elem))
-;; 		     (alist/get-key 'description elem))))
-;; 	  items)))
+(define (anx/print-dimensions-table)
+  ;; -> IO
+  "Print a table of the report's dimensions in the *scratch* buffer."
+  (let* ((dimensions (anx/process-dimensions))
+	 (title (cadadr (second dimensions)))
+	 (header (cadr (third dimensions)))
+	 (items (cadr (fourth dimensions)))
+	 (header-string
+	  (string-append "|| "
+			 (string-join *anx-standard-table-header* " || ")
+			 " ||\n")))
+    (format #t "~%h2. ~A~%~%" title)
+    (format #t "~A~%" header-string)
+    (for-each (lambda (elem)
+		(format #t *anx-report-dimensions-table-row*
+			(alist/get-key 'name elem)
+			(alist/get-key 'type elem)
+			(alist/get-key 'filter_by elem)
+			(alist/get-key 'description elem)))
+	      items)))
 
-;; (defun anx-print-metrics-table ()
-;;   ;; Array -> IO State!
-;;   "Print a table of the report's metrics in the *scratch* buffer."
-;;   (let* ((metrics (anx-process-metrics))
-;; 	 (items (car (alist/get-key 'items metrics)))
-;; 	 (title (cadar (alist/get-key 'title metrics)))
-;; 	 (header (car (alist/get-key 'header metrics)))
-;; 	 (header-string
-;; 	  (concat "|| " (mapconcat
-;; 			 (lambda (x) x)
-;; 			 header " || ") " ||")))
-;;     (anx-print-to-scratch-buffer (format "\nh2. %s\n\n" title))
-;;     (anx-print-to-scratch-buffer (format "%s\n" header-string))
-;;     (mapc (lambda (elem)
-;; 	    (anx-print-to-scratch-buffer
-;; 	     (format *anx-report-metrics-table-row*
-;; 		     (alist/get-key 'name elem)
-;; 		     (alist/get-key 'type elem)
-;; 		     ""
-;; 		     (alist/get-key 'description elem))))
-;; 	  items)))
+(define (anx/print-metrics-table)
+  ;; Array -> IO State!
+  "Print a table of the report's metrics in the *scratch* buffer."
+  (let* ((metrics (anx-process-metrics))
+	 (title (cadadr (second metrics)))
+	 (header (cadr (third metrics)))
+	 (items (cadr (fourth metrics)))
+	 (header-string
+	  (string-append "|| "
+			 (string-join *anx-report-metrics-table-header* " || ")
+			 " ||\n")))
+    (format #t "~%h2. ~A~%~%" title)
+    (format #t "~A~%" header-string)
+    (for-each (lambda (elem)
+		(format #t
+			*anx-report-metrics-table-row*
+			(alist/get-key 'name elem)
+			(alist/get-key 'type elem)
+			""
+			(alist/get-key 'description elem)))
+	      items)))
 
-;; (defun anx-print-report-meta (report-meta-alist)
-;;   ;; Array -> IO State!
-;;   "Generate report documentation from REPORT-META-ALIST.
-;; Along the way, sets up and tears down hash tables to hold the
-;; necessary state."
-;;   (progn
-;;     (anx-build-columns-table report-meta-alist)
-;;     (anx-build-filters-table report-meta-alist)
-;;     (anx-build-havings-table report-meta-alist)
-;;     (anx-print-dimensions-table)
-;;     (anx-print-metrics-table)
-;;     (anx-clear-report-tables)))
+(define (anx/clear-report-tables!)
+  ;; -> State!
+  "Clear state hash tables used to generate documentation for reporting APIs."
+  (begin (table-clear! *anx-havings-table*)
+	 (table-clear! *anx-columns-table*)
+	 (table-clear! *anx-filters-table*)))
 
-;; (defun anx-really-print-report-meta ()
-;;   ;; -> IO State!
-;;   "Generate reporting API documentation from the current buffer.
-;; Prints its output to the *scratch* buffer."
-;;   (interactive)
-;;   (let ((report-meta (read (buffer-string))))
-;;     (anx-print-report-meta report-meta)))
+(define (anx/print-report-meta report-meta-alist)
+  ;; Array -> IO State!
+  "Generate report documentation from REPORT-META-ALIST.
+Along the way, sets up and tears down hash tables to hold the
+necessary state."
+  (begin
+    (anx/build-columns-table! report-meta-alist)
+    (anx/build-filters-table! report-meta-alist)
+    (anx/build-havings-table! report-meta-alist)
+    (anx/print-dimensions-table)
+    (anx/print-metrics-table)
+    (anx/clear-report-tables!)))
 
-;; (defun anx-clear-report-tables ()
-;;   ;; -> State!
-;;   "Clear state hash tables used to generate documentation for reporting APIs."
-;;   (progn (clrhash *anx-havings-table*)
-;; 	 (clrhash *anx-columns-table*)
-;; 	 (clrhash *anx-filters-table*)))
+(define (anx/really-print-report-meta sym)
+  ;; -> IO State!
+  "Generate reporting API documentation from the current buffer.
+Prints its output to the *scratch* buffer."
+  (let ((meta (get-report-meta sym)))
+    (anx/print-report-meta (anx/extract-report-meta-fields meta))))
 
 ;; Report /meta output for testing.
 
