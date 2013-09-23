@@ -57,6 +57,7 @@
 		 (newline)
 		 #f)))))
 
+;;; FIXME: Refactor these.
 (define (get-service-meta service)
   (let ((it (safe-symbol->string service)))
     (if (not (logged-in?))
@@ -68,6 +69,19 @@
 		     (run/string
 		      (curl -b cookies
 			    ,(string-append *api-url* "/" it "/meta"))))))
+	  str))))
+
+(define (get-report-meta report)
+  (let ((it (safe-symbol->string report)))
+    (if (not (logged-in?))
+	(begin 
+	  (format #t "Have to log in again, just a moment...~%")
+	  (auth)
+	       (get-report-meta report))
+	(let ((str (with-cwd *wd*
+		     (run/string
+		      (curl -b cookies
+			    ,(string-append *api-url* "/report?meta=" it))))))
 	  str))))
 
 (define (safe-symbol->string x)
