@@ -255,30 +255,43 @@ that need to be defined in their own tables."
 ;; Associate 'column' and 'type' fields from the 'columns' array.
 (define *anx-columns-table* (make-table))
 
-;; (defun anx-build-columns-table (report-meta-alist)
-;;   ;; Array -> State!
-;;   "Given REPORT-META-ALIST, builds *anx-columns-table* from it."
-;;   (mapc (lambda (alist)
-;; 	  (puthash (anx-assoc-val 'column alist)
-;; 		   (anx-assoc-val 'type alist)
-;; 		   *anx-columns-table*))
-;; 	(anx-assoc-val 'columns report-meta-alist)))
+(define (anx/extract-report-meta-fields resp)		;DONE
+  ;; String -> Vector (of Alists)
+  ""
+  (let* ((parsed (json/parse-string resp))
+	 (fields (alist/get-key 'meta (alist/get-key 'response parsed))))
+    fields))
 
-;; (defun anx-build-filters-table (report-meta-alist)
-;;   ;; Array -> State!
-;;   "Given REPORT-META-ALIST, builds *anx-filters-table* from it."
-;;   (mapc (lambda (alist)
-;; 	  (puthash (anx-assoc-val 'column alist)
-;; 		   (anx-assoc-val 'type alist)
-;; 		   *anx-filters-table*))
-;; 	(anx-assoc-val 'filters report-meta-alist)))
+(define (table-clear! t)
+    (table-walk (lambda (k v)
+		  (table-set! t k #f)) t))
+
+;;; FIXME: Refactor these procedures.
+(define (anx/build-columns-table! report-meta-alist) ;DONE
+  ;; Array -> State!
+  "Given REPORT-META-ALIST, builds *anx-columns-table* from it."
+  (vector-for-each (lambda (i elt)
+		     (table-set! *anx-columns-table*
+				 (string->symbol (alist/get-key 'column elt))
+				 (alist/get-key 'type elt)))
+		   ;; Returns a vector of Alists
+		   (alist/get-key 'columns report-meta-alist)))
+
+(define (anx/build-filters-table! report-meta-alist) ;DONE
+  ;; Array -> State!
+  "Given REPORT-META-ALIST, builds *anx-filters-table* from it."
+  (vector-for-each (lambda (i elt)
+		     (table-set! *anx-filters-table*
+				 (string->symbol (alist/get-key 'column elt))
+				 (alist/get-key 'type elt)))
+		   (alist/get-key 'filters report-meta-alist)))
 
 ;; (defun anx-build-havings-table (report-meta-alist)
 ;;   ;; Array -> State!
 ;;   "Given REPORT-META-ALIST, builds *anx-havings-table* from it."
 ;;   (mapc (lambda (alist)
-;; 	  (puthash (anx-assoc-val 'column alist) t *anx-havings-table*))
-;; 	(anx-assoc-val 'havings report-meta-alist)))
+;; 	  (puthash (alist/get-key 'column alist) t *anx-havings-table*))
+;; 	(alist/get-key 'havings report-meta-alist)))
 
 ;; (defun anx-build-dimensions-list ()
 ;;   ;; -> List
@@ -354,9 +367,9 @@ that need to be defined in their own tables."
 ;;   ;; -> IO
 ;;   "Print a table of the report's dimensions in the *scratch* buffer."
 ;;   (let* ((dimensions (anx-process-dimensions))
-;; 	 (items (car (anx-assoc-val 'items dimensions)))
-;; 	 (title (cadar (anx-assoc-val 'title dimensions)))
-;; 	 (header (car (anx-assoc-val 'header (anx-process-dimensions))))
+;; 	 (items (car (alist/get-key 'items dimensions)))
+;; 	 (title (cadar (alist/get-key 'title dimensions)))
+;; 	 (header (car (alist/get-key 'header (anx-process-dimensions))))
 ;; 	 (header-string
 ;; 	  (concat "|| " (mapconcat
 ;; 			 (lambda (x) x)
@@ -366,19 +379,19 @@ that need to be defined in their own tables."
 ;;     (mapc (lambda (elem)
 ;; 	    (anx-print-to-scratch-buffer
 ;; 	     (format *anx-report-dimensions-table-row*
-;; 		     (anx-assoc-val 'name elem)
-;; 		     (anx-assoc-val 'type elem)
-;; 		     (anx-translate-boolean (anx-assoc-val 'filter_by elem))
-;; 		     (anx-assoc-val 'description elem))))
+;; 		     (alist/get-key 'name elem)
+;; 		     (alist/get-key 'type elem)
+;; 		     (anx-translate-boolean (alist/get-key 'filter_by elem))
+;; 		     (alist/get-key 'description elem))))
 ;; 	  items)))
 
 ;; (defun anx-print-metrics-table ()
 ;;   ;; Array -> IO State!
 ;;   "Print a table of the report's metrics in the *scratch* buffer."
 ;;   (let* ((metrics (anx-process-metrics))
-;; 	 (items (car (anx-assoc-val 'items metrics)))
-;; 	 (title (cadar (anx-assoc-val 'title metrics)))
-;; 	 (header (car (anx-assoc-val 'header metrics)))
+;; 	 (items (car (alist/get-key 'items metrics)))
+;; 	 (title (cadar (alist/get-key 'title metrics)))
+;; 	 (header (car (alist/get-key 'header metrics)))
 ;; 	 (header-string
 ;; 	  (concat "|| " (mapconcat
 ;; 			 (lambda (x) x)
@@ -388,10 +401,10 @@ that need to be defined in their own tables."
 ;;     (mapc (lambda (elem)
 ;; 	    (anx-print-to-scratch-buffer
 ;; 	     (format *anx-report-metrics-table-row*
-;; 		     (anx-assoc-val 'name elem)
-;; 		     (anx-assoc-val 'type elem)
+;; 		     (alist/get-key 'name elem)
+;; 		     (alist/get-key 'type elem)
 ;; 		     ""
-;; 		     (anx-assoc-val 'description elem))))
+;; 		     (alist/get-key 'description elem))))
 ;; 	  items)))
 
 ;; (defun anx-print-report-meta (report-meta-alist)
@@ -421,6 +434,271 @@ that need to be defined in their own tables."
 ;;   (progn (clrhash *anx-havings-table*)
 ;; 	 (clrhash *anx-columns-table*)
 ;; 	 (clrhash *anx-filters-table*)))
+
+;; Report /meta output for testing.
+
+(define network-analytics-json
+  '((response (status . "OK")
+	      (meta (time_granularity . "hourly")
+		    (columns
+		     . #(((column . "month") (type . "date"))
+			 ((column . "day") (type . "date"))
+			 ((column . "hour") (type . "date"))
+			 ((column . "buyer_member_id") (type . "int"))
+			 ((column . "seller_member_id") (type . "int"))
+			 ((column . "seller_member_name") (type . "string"))
+			 ((column . "seller_member") (type . "string"))
+			 ((column . "advertiser_id") (type . "int"))
+			 ((column . "advertiser_name") (type . "string"))
+			 ((column . "advertiser") (type . "string"))
+			 ((column . "line_item_id") (type . "int"))
+			 ((column . "line_item_name") (type . "string"))
+			 ((column . "line_item") (type . "string"))
+			 ((column . "pub_rule_id") (type . "int"))
+			 ((column . "pub_rule_name") (type . "string"))
+			 ((column . "pub_rule") (type . "string"))
+			 ((column . "campaign_id") (type . "int"))
+			 ((column . "campaign_name") (type . "string"))
+			 ((column . "campaign") (type . "string"))
+			 ((column . "size") (type . "string"))
+			 ((column . "geo_country") (type . "string"))
+			 ((column . "geo_country_name") (type . "string"))
+			 ((column . "inventory_class") (type . "string"))
+			 ((column . "inventory_source_id") (type . "int"))
+			 ((column . "inventory_source_name") (type . "string"))
+			 ((column . "inventory_source") (type . "string"))
+			 ((column . "imps") (type . "int"))
+			 ((column . "clicks") (type . "int"))
+			 ((column . "cost") (type . "money"))
+			 ((column . "revenue") (type . "money"))
+			 ((column . "booked_revenue") (type . "money"))
+			 ((column . "reseller_revenue") (type . "money"))
+			 ((column . "profit") (type . "money"))
+			 ((column . "cpm") (type . "money"))
+			 ((column . "total_convs") (type . "int"))
+			 ((column . "convs_rate") (type . "double"))
+			 ((column . "ctr") (type . "double"))
+			 ((column . "rpm") (type . "money"))
+			 ((column . "total_network_rpm") (type . "money"))
+			 ((column . "ppm") (type . "money"))
+			 ((column . "bid_type") (type . "string"))
+			 ((column . "buyer_type") (type . "string"))
+			 ((column . "seller_type") (type . "string"))
+			 ((column . "imp_type") (type . "string"))
+			 ((column . "imps_blank") (type . "int"))
+			 ((column . "imps_psa") (type . "int"))
+			 ((column . "imps_default_error") (type . "int"))
+			 ((column . "imps_default_bidder") (type . "int"))
+			 ((column . "imps_kept") (type . "int"))
+			 ((column . "imps_resold") (type . "int"))
+			 ((column . "imps_rtb") (type . "int"))
+			 ((column . "entity_member_id") (type . "int"))
+			 ((column . "imp_type_id") (type . "int"))
+			 ((column . "post_view_convs") (type . "int"))
+			 ((column . "post_view_revenue") (type . "money"))
+			 ((column . "post_click_convs") (type . "int"))
+			 ((column . "post_click_revenue") (type . "money"))
+			 ((column . "advertiser_currency") (type . "string"))
+			 ((column . "booked_revenue_adv_curr") (type . "money"))
+			 ((column . "salesperson_for_advertiser")
+			  (type . "string"))
+			 ((column . "salesperson_for_publisher") (type . "string"))
+			 ((column . "account_manager_for_advertiser")
+			  (type . "string"))
+			 ((column . "account_manager_for_publisher")
+			  (type . "string"))
+			 ((column . "pixel_id") (type . "int"))
+			 ((column . "imps_psa_error") (type . "int"))
+			 ((column . "site_id") (type . "int"))
+			 ((column . "insertion_order_id") (type . "int"))
+			 ((column . "insertion_order_name") (type . "string"))
+			 ((column . "insertion_order") (type . "string"))
+			 ((column . "commissions") (type . "money"))
+			 ((column . "serving_fees") (type . "money"))
+			 ((column . "revenue_including_fees") (type . "money"))
+			 ((column . "cost_including_fees") (type . "money"))
+			 ((column . "profit_including_fees") (type . "money"))
+			 ((column . "cpm_including_fees") (type . "money"))
+			 ((column . "rpm_including_fees") (type . "money"))
+			 ((column . "ppm_including_fees") (type . "money"))
+			 ((column . "sold_network_rpm") (type . "double"))
+			 ((column . "sold_publisher_rpm") (type . "double"))
+			 ((column . "brand_id") (type . "int"))
+			 ((column . "brand_name") (type . "string"))
+			 ((column . "brand") (type . "string"))
+			 ((column . "total_publisher_rpm") (type . "money"))
+			 ((column . "payment_type") (type . "string"))
+			 ((column . "adjustment_id") (type . "int"))
+			 ((column . "publisher_currency") (type . "string"))
+			 ((column . "media_cost_pub_curr") (type . "money"))
+			 ((column . "convs_per_mm") (type . "double"))
+			 ((column . "trafficker_for_line_item") (type . "string"))
+			 ((column . "salesrep_for_line_item") (type . "string"))
+			 ((column . "supply_type") (type . "string"))
+			 ((column . "revenue_type_id") (type . "int"))
+			 ((column . "revenue_type") (type . "string"))
+			 ((column . "click_thru_pct") (type . "double"))
+			 ((column . "external_impression") (type . "int"))
+			 ((column . "external_click") (type . "int"))
+			 ((column . "site_name") (type . "string"))
+			 ((column . "site") (type . "string"))
+			 ((column . "campaign_priority") (type . "int"))
+			 ((column . "insertion_order_code") (type . "string"))
+			 ((column . "line_item_code") (type . "string"))
+			 ((column . "campaign_code") (type . "string"))
+			 ((column . "advertiser_code") (type . "string"))
+			 ((column . "publisher_code") (type . "string"))
+			 ((column . "site_code") (type . "string"))
+			 ((column . "pub_rule_code") (type . "string"))
+			 ((column . "user_group_for_campaign") (type . "string"))
+			 ((column . "publisher_id") (type . "int"))
+			 ((column . "publisher_name") (type . "string"))
+			 ((column . "publisher") (type . "string"))
+			 ((column . "placement_id") (type . "int"))
+			 ((column . "placement_code") (type . "string"))
+			 ((column . "placement_name") (type . "string"))
+			 ((column . "placement") (type . "string"))
+			 ((column . "content_category_id") (type . "int"))
+			 ((column . "content_category_name") (type . "string"))
+			 ((column . "content_category") (type . "string"))
+			 ((column . "buyer_member_name") (type . "string"))
+			 ((column . "buyer_member") (type . "string"))
+			 ((column . "media_type") (type . "string"))
+			 ((column . "media_type_id") (type . "int"))
+			 ((column . "campaign_type") (type . "string"))
+			 ((column . "advertiser_type") (type . "string"))
+			 ((column . "fold_position_id") (type . "int"))
+			 ((column . "fold_position") (type . "string"))
+			 ((column . "imps_insertion") (type . "int"))))
+		    (label_fields
+		     . #("salesperson_for_advertiser"
+			 "salesperson_for_publisher"
+			 "account_manager_for_advertiser"
+			 "account_manager_for_publisher"
+			 "trafficker_for_line_item"
+			 "salesrep_for_line_item"
+			 "user_group_for_campaign"
+			 "campaign_type"
+			 "advertiser_type"))
+		    (filters
+		     . #(((column . "hour") (type . "date"))
+			 ((column . "day") (type . "date"))
+			 ((column . "month") (type . "date"))
+			 ((column . "buyer_member_id") (type . "int"))
+			 ((column . "seller_member_id") (type . "int"))
+			 ((column . "advertiser_id") (type . "int"))
+			 ((column . "line_item_id") (type . "int"))
+			 ((column . "pub_rule_id") (type . "int"))
+			 ((column . "campaign_id") (type . "int"))
+			 ((column . "size") (type . "string"))
+			 ((column . "geo_country") (type . "string"))
+			 ((column . "inventory_class") (type . "string"))
+			 ((column . "inventory_source_id") (type . "int"))
+			 ((column . "bid_type") (type . "string"))
+			 ((column . "buyer_type") (type . "string"))
+			 ((column . "seller_type") (type . "string"))
+			 ((column . "imp_type") (type . "string"))
+			 ((column . "entity_member_id") (type . "int"))
+			 ((column . "imp_type_id") (type . "int"))
+			 ((column . "advertiser_currency") (type . "string"))
+			 ((column . "salesperson_for_advertiser")
+			  (type . "string"))
+			 ((column . "salesperson_for_publisher") (type . "string"))
+			 ((column . "account_manager_for_advertiser")
+			  (type . "string"))
+			 ((column . "account_manager_for_publisher")
+			  (type . "string"))
+			 ((column . "pixel_id") (type . "int"))
+			 ((column . "site_id") (type . "int"))
+			 ((column . "insertion_order_id") (type . "int"))
+			 ((column . "brand_id") (type . "int"))
+			 ((column . "payment_type") (type . "string"))
+			 ((column . "adjustment_id") (type . "int"))
+			 ((column . "publisher_currency") (type . "string"))
+			 ((column . "trafficker_for_line_item") (type . "string"))
+			 ((column . "salesrep_for_line_item") (type . "string"))
+			 ((column . "supply_type") (type . "string"))
+			 ((column . "revenue_type_id") (type . "int"))
+			 ((column . "user_group_for_campaign") (type . "string"))
+			 ((column . "publisher_id") (type . "int"))
+			 ((column . "placement_id") (type . "int"))
+			 ((column . "placement_name") (type . "string"))
+			 ((column . "placement") (type . "string"))
+			 ((column . "content_category_id") (type . "int"))
+			 ((column . "media_type") (type . "string"))
+			 ((column . "media_type_id") (type . "int"))
+			 ((column . "campaign_type") (type . "string"))
+			 ((column . "advertiser_type") (type . "string"))
+			 ((column . "fold_position_id") (type . "int"))))
+		    (havings
+		     . #(((column . "imps"))
+			 ((column . "clicks"))
+			 ((column . "cost"))
+			 ((column . "revenue"))
+			 ((column . "booked_revenue"))
+			 ((column . "reseller_revenue"))
+			 ((column . "profit"))
+			 ((column . "cpm"))
+			 ((column . "total_convs"))
+			 ((column . "convs_rate"))
+			 ((column . "ctr"))
+			 ((column . "rpm"))
+			 ((column . "total_network_rpm"))
+			 ((column . "ppm"))
+			 ((column . "imps_blank"))
+			 ((column . "imps_psa"))
+			 ((column . "imps_default_error"))
+			 ((column . "imps_default_bidder"))
+			 ((column . "imps_kept"))
+			 ((column . "imps_resold"))
+			 ((column . "imps_rtb"))
+			 ((column . "post_view_convs"))
+			 ((column . "post_view_revenue"))
+			 ((column . "post_click_convs"))
+			 ((column . "post_click_revenue"))
+			 ((column . "booked_revenue_adv_curr"))
+			 ((column . "imps_psa_error"))
+			 ((column . "commissions"))
+			 ((column . "serving_fees"))
+			 ((column . "revenue_including_fees"))
+			 ((column . "cost_including_fees"))
+			 ((column . "profit_including_fees"))
+			 ((column . "cpm_including_fees"))
+			 ((column . "rpm_including_fees"))
+			 ((column . "ppm_including_fees"))
+			 ((column . "sold_network_rpm"))
+			 ((column . "sold_publisher_rpm"))
+			 ((column . "total_publisher_rpm"))
+			 ((column . "media_cost_pub_curr"))
+			 ((column . "convs_per_mm"))
+			 ((column . "click_thru_pct"))
+			 ((column . "external_impression"))
+			 ((column . "external_click"))
+			 ((column . "imps_insertion"))))
+		    (time_intervals
+		     . #("current_hour"
+			 "last_hour"
+			 "last_48_hours"
+			 "today"
+			 "yesterday"
+			 "last_7_days"
+			 "month_to_date"
+			 "quarter_to_date"
+			 "last_month"
+			 "lifetime"
+			 "mtd"
+			 "last_14_days"
+			 "month_to_yesterday"
+			 "last_2_days")))
+	      (dbg_info (instance . "29.bm-hbapi.prod.nym1")
+			(slave_hit . #f)
+			(db . "master")
+			(awesomesauce_cache_used . #f)
+			(count_cache_used . #f)
+			(warnings . #())
+			(time . 581.744)
+			(start_microtime . 1.37997e+09)
+			(version . "1.13.61")))))
 
 ;;--------------------------------------------------------------------
 ;; The main Scsh executable.
