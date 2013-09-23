@@ -286,12 +286,14 @@ that need to be defined in their own tables."
 				 (alist/get-key 'type elt)))
 		   (alist/get-key 'filters report-meta-alist)))
 
-;; (defun anx-build-havings-table (report-meta-alist)
-;;   ;; Array -> State!
-;;   "Given REPORT-META-ALIST, builds *anx-havings-table* from it."
-;;   (mapc (lambda (alist)
-;; 	  (puthash (alist/get-key 'column alist) t *anx-havings-table*))
-;; 	(alist/get-key 'havings report-meta-alist)))
+(define (anx/build-havings-table! report-meta-alist)
+  ;; Array -> State!
+  "Given REPORT-META-ALIST, builds *anx-havings-table* from it."
+  (vector-for-each (lambda (i elt)
+		     (table-set! *anx-havings-table*
+				 (string->symbol (alist/get-key 'column elt))
+				 #t))
+		   (alist/get-key 'havings report-meta-alist)))
 
 ;; (defun anx-build-dimensions-list ()
 ;;   ;; -> List
