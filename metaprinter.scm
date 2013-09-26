@@ -357,7 +357,7 @@ Use `anx-translate-boolean' to create a representation suitable for printing."
 			   (cons 'type (anx/get-column-type elem))
 			   (cons 'formula "")
 			   (cons 'description "")))
-		   (anx-build-metrics-list)))))
+		   (anx/build-metrics-list)))))
 
 (define (anx/process-dimensions-and-metrics)
   ;; -> Alist
@@ -390,7 +390,7 @@ Use `anx-translate-boolean' to create a representation suitable for printing."
 (define (anx/print-metrics-table)
   ;; Array -> IO State!
   "Print a table of the report's metrics in the *scratch* buffer."
-  (let* ((metrics (anx-process-metrics))
+  (let* ((metrics (anx/process-metrics))
 	 (title (cadadr (second metrics)))
 	 (header (cadr (third metrics)))
 	 (items (cadr (fourth metrics)))
