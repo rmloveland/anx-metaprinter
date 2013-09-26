@@ -8,8 +8,7 @@
 (define-interface anx-docgen-interface
   (export main				;defined in metaprinter.scm
 	  anx/really-print-meta
-	  auth
-	  get-service-meta))
+	  anx/really-print-report-meta))
 
 (define-structure anx-docgen anx-docgen-interface
   (open
