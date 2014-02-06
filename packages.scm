@@ -1,9 +1,4 @@
-;;;; -*- mode: scheme48 -*-
-;;;; anx-docgen.scm --- Generate wiki doc tables for the AppNexus API.
-
-;;--------------------------------------------------------------------
-;;                       Interface Definition
-;;--------------------------------------------------------------------
+;;; -*- mode: scheme48 -*-
 
 (define-interface anx-docgen-interface
   (export main				;defined in metaprinter.scm
@@ -28,5 +23,3 @@
    json-parser
    vector-lib
    metaprinter))
-
-;; anx-docgen.scm ends here
