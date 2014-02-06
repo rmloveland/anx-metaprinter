@@ -1,5 +1,4 @@
 ;;;; -*- mode: scheme48 -*-
-;;;; anx-utils.scm --- Various utilities.
 
 (define-syntax push!
   (syntax-rules ()

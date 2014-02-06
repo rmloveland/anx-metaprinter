@@ -1,7 +1,7 @@
 ;;; -*- mode: scheme48 -*-
 
 (define-interface anx-docgen-interface
-  (export main				;defined in metaprinter.scm
+  (export main				;Defined in metaprinter.scm
 	  anx/really-print-meta
 	  anx/really-print-report-meta
 	  get-service-meta
@@ -16,7 +16,7 @@
    scheme-with-scsh
    tables
    srfi-1
-   srfi-13)  ; STRING-UPCASE, STRING-JOIN
+   srfi-13)  ;STRING-UPCASE, STRING-JOIN
   (files
    anx-api
    anx-utils

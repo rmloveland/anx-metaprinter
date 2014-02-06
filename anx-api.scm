@@ -1,5 +1,4 @@
-;;;; -*- mode: scheme48 -*-
-;;;; anx-api.scm --- Simple Scsh wrapper for the AppNexus API.
+;;; -*- mode: scheme48 -*-
 
 (define *api-url* "http://api.appnexus.com/")
 (define *wd* (string-append (home-dir) "/bin/.metaprinter"))
@@ -57,7 +56,6 @@
 		 (newline)
 		 #f)))))
 
-;;; FIXME: Refactor these.
 (define (get-service-meta service)
   (let ((it (safe-symbol->string service)))
     (if (not (logged-in?))
@@ -88,5 +86,3 @@
   (cond ((string? x) x)
 	((symbol? x)
 	 (symbol->string x))))
-
-;; anx-api.scm ends here

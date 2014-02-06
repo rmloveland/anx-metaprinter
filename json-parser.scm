@@ -1,6 +1,6 @@
-;;;; json-parser.scm --- A JSON parser for Scsh.     -*- mode: scheme48 -*-
-;;;; Original (c) Jörn Horstmann (http://blog.planetxml.de/)
-;;;; Scsh translation and further customizations (c) 2013 Rich Loveland
+;;; -*- mode: scheme48 -*-
+;;; Original (c) Jörn Horstmann (http://blog.planetxml.de/)
+;;; scsh translation and customizations (c) 2013 Rich Loveland
 
 (define (json/parse p)
   (set-current-input-port! p)
@@ -28,7 +28,7 @@
         (reverse result)
         (loop (cons token result) (next-token)))))
 
-; Helper for error reporting.
+;; Helper for error reporting.
 (define (->string x)
   (cond
    ((char? x) (string x))
@@ -36,7 +36,7 @@
    ((eof-object? x) "<EOF>")
    (else "")))
 
-; Testing for control characters, handles only ASCII and ISO-8859-1.
+;; Testing for control characters, handles only ASCII and ISO-8859-1.
 (define (char-control? ch)
   (let ((i (char->integer ch)))
     (or (< i 32)
@@ -48,8 +48,8 @@
 (define (parse-error token)
   (error (string-append "Unexpected token: " (->string token))))
 
-; Reads a character and signals an error if it does not match the
-; expected character.
+;; Reads a character and signals an error if it does not match the
+;; expected character.
 (define (consume-char expect)
   (let ((ch (read-char)))
     (if (eqv? ch expect)
@@ -75,7 +75,7 @@
                 ch
                 (lexer-error ch))))))
 
-; Parsing of numbers is not really correct.
+;; Parsing of numbers is not really correct.
 (define (parse-number ch)
   (let loop ((res (string ch)))
     (let ((ch (peek-char)))
@@ -85,8 +85,8 @@
                 (loop (string-append res (string ch)))))
         (else (string->number res))))))
 
-; Reads the symbol 'true. The first character has already been read by
-; `next-token'.
+;; Reads the symbol 'true. The first character has already been read by
+;; `next-token'.
 (define (parse-true )
   (begin
     (consume-char #\r )
@@ -94,8 +94,8 @@
     (consume-char #\e )
     #t))
 
-; Reads the symbol 'false. The first character has already been read
-; by `next-token'.
+;; Reads the symbol 'false. The first character has already been read
+;; by `next-token'.
 (define (parse-false )
   (begin
     (consume-char #\a )
@@ -104,8 +104,8 @@
     (consume-char #\e )
     #f))
 
-; Reads the symbol 'null. The first character has already been read by
-; `next-token'.
+;; Reads the symbol 'null. The first character has already been read by
+;; `next-token'.
 (define (parse-null )
   (begin
     (consume-char #\u )
@@ -147,7 +147,7 @@
           ((<= 48 i 57)  (- i 48)) ; 0-9
           (else (lexer-error ch)))))
 
-; Parse a Unicode escape consisting of four hexadecimal characters.
+;; Parse a Unicode escape consisting of four hexadecimal characters.
 (define (parse-unicode )
   (let* ((a (hex-char-value (read-char )))
          (b (hex-char-value (read-char )))
@@ -202,5 +202,3 @@
                 ((eqv? next 'close-brace) (list->vector (reverse res)))
                 ((eqv? next 'comma) (loop res))
                 (else (parse-error next)))))))))
-
-;; json-parser.scm ends here
