@@ -32,11 +32,11 @@ key-value pair."
 	(cdr result)
 	result)))
 
-(define (anx/vector-of-alists? object)
+(define (anx/list-of-alists? object)
   ;; Object -> Boolean
-  "Determine if OBJECT is a vector of association lists."
-  (and (vector? object)
-       (vector-every alist? object)))
+  "Determine if OBJECT is a list of association lists."
+  (and (list? object)
+       (every alist? object)))
 
 (define (anx/stack-push! item)
   ;; Item -> State!
@@ -84,18 +84,17 @@ These are created when some JSON fields contain child fields
 that need to be defined in their own tables."
   (let* ((lc-name (car xs))
 	 (uc-name (string-titlecase lc-name))
-	 (vector-of-alists (cdr xs)))
+	 (alists (cdr xs)))
     (list
      (list 'title
 	   (list 'text uc-name))
      (list 'columns
 	   *anx-standard-table-header*)
      (cons 'rows
-	   (vector->list
-	    (vector-map (lambda (i object)
+	    (map (lambda (object)
 			  ;; Nothing should have fields at this level (I hope).
-			  (anx/alistify-object object))
-			vector-of-alists))))))
+		   (anx/alistify-object object))
+		 alists)))))
 
 (define (anx/process-stack-items!)
   ;; -> IO State!
@@ -122,7 +121,7 @@ that need to be defined in their own tables."
     (anx/stack-push! (cons name (alist/get-key 'fields json-object)))))
 
 (define (anx/process-object json-object)
-  ;; Vector -> Alist State!
+  ;; Alist -> Alist State!
   "Given JSON-OBJECT, we alistify it and stash any child fields on the stack."
   (if (anx/object-has-fields? json-object)
       (anx/save-fields-for-later! json-object))
@@ -132,34 +131,34 @@ that need to be defined in their own tables."
 (define *anx-standard-table-header*
   '("Name" "Type" "Sort by?" "Filter by?" "Description" "Default" "Required on"))
 
-(define (anx/process-objects vector-of-alists)
-  ;; Vector -> IO State!
-  "Given VECTOR-OF-ALISTS, ..."
+(define (anx/process-objects list-of-alists)
+  ;; List -> IO State!
+  "Given a LIST-OF-ALISTS, ..."
   (list
    (list 'title
 	 (list 'text "JSON Fields"))
    (list 'columns
 	 *anx-standard-table-header*)
    (cons 'rows
-	 (vector-map (lambda (i json-object)
+	 (map (lambda (json-object)
 		       (anx/process-object json-object))
-		     vector-of-alists))))
+		     list-of-alists))))
 
 ;; Format string for standard API wiki table rows.
 (define *anx-standard-table-row*
   "| ~A | ~A | ~A | ~A | ~A | ~A | ~A |~%")
 
-(define (anx/process-meta! vector-of-alists)
-  ;; Vector -> Alist State!
-  "Given VECTOR-OF-ALISTS, return an alist in intermediate representation."
-  (let ((parent (anx/process-objects vector-of-alists))
+(define (anx/process-meta! list-of-alists)
+  ;; List -> Alist State!
+  "Given LIST-OF-ALISTS, return an alist in intermediate representation."
+  (let ((parent (anx/process-objects list-of-alists))
 	(children (anx/process-stack-items!)))
     (anx/stack-clear!)
     (list (list 'parent parent)
 	  (list 'children children))))
 
 (define (anx/extract-meta-fields resp)
-  ;; String -> Vector (of Alists)
+  ;; String -> List
   "Extract the relevant field names from RESP."
   (let* ((parsed (json/parse-string resp))
 	 (fields (alist/get-key 'fields (alist/get-key 'response parsed))))
@@ -208,20 +207,20 @@ that need to be defined in their own tables."
 				   (alist/get-key 'required_on row)))
 			 rows)))))
 
-(define (anx/print-meta vector-of-alists)
-  ;; Vector -> IO State!
-  "Given an VECTOR-OF-ALISTS, print documentation tables from it."
-  (if (anx/vector-of-alists? vector-of-alists)
-      (let* ((ir (anx/process-meta! vector-of-alists))
+(define (anx/print-meta list-of-alists)
+  ;; List -> IO State!
+  "Given LIST-OF-ALISTS, print documentation tables from it."
+  (if (anx/list-of-alists? list-of-alists)
+      (let* ((ir (anx/process-meta! list-of-alists))
 	     (parent (car (alist/get-key 'parent ir)))
 	     (children (car (alist/get-key 'children ir))))
 	(begin
 	  (anx/stack-clear!)
-	  (anx/process-objects vector-of-alists)
+	  (anx/process-objects list-of-alists)
 	  (anx/process-stack-items!)
 	  (anx/print-parent parent)
 	  (anx/print-children children)))
-  (error "`anx/print-meta' expects a vector of association lists")))
+  (error "`anx/print-meta' expects a list of association lists")))
 
 (define (anx/really-print-meta sym)
   ;; -> IO State!
@@ -259,7 +258,7 @@ Prints to standard output."
 (define *anx-columns-table* (make-table))
 
 (define (anx/extract-report-meta-fields resp)
-  ;; String -> Vector (of Alists)
+  ;; String -> List
   "Extract the relevant field names from RESP."
   (let* ((parsed (json/parse-string resp))
 	 (fields (alist/get-key 'meta (alist/get-key 'response parsed))))
@@ -272,17 +271,17 @@ Prints to standard output."
 (define (anx/build-columns-table! report-meta-alist)
   ;; Array -> State!
   "Given REPORT-META-ALIST, builds *anx-columns-table* from it."
-  (vector-for-each (lambda (i elt)
+  (for-each (lambda (elt)
 		     (table-set! *anx-columns-table*
 				 (string->symbol (alist/get-key 'column elt))
 				 (alist/get-key 'type elt)))
-		   ;; Returns a vector of Alists
+		   ;; Returns a list of association lists.
 		   (alist/get-key 'columns report-meta-alist)))
 
 (define (anx/build-filters-table! report-meta-alist)
   ;; Array -> State!
   "Given REPORT-META-ALIST, builds *anx-filters-table* from it."
-  (vector-for-each (lambda (i elt)
+  (for-each (lambda (elt)
 		     (table-set! *anx-filters-table*
 				 (string->symbol (alist/get-key 'column elt))
 				 (alist/get-key 'type elt)))
@@ -291,7 +290,7 @@ Prints to standard output."
 (define (anx/build-havings-table! report-meta-alist)
   ;; Array -> State!
   "Given REPORT-META-ALIST, builds *anx-havings-table* from it."
-  (vector-for-each (lambda (i elt)
+  (for-each (lambda (elt)
 		     (table-set! *anx-havings-table*
 				 (string->symbol (alist/get-key 'column elt))
 				 #t))
