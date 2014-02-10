@@ -22,4 +22,4 @@
    anx-utils
    json-parser
    vector-lib
-   metaprinter))
+   anx-docgen))
