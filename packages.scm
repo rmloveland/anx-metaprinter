@@ -1,8 +1,10 @@
 ;;; -*- mode: scheme48 -*-
 
 (define-interface anx-docgen-interface
-  (export main				;Defined in metaprinter.scm
+  (export main
+	  anx/print-meta
 	  anx/really-print-meta
+	  anx/print-report-meta
 	  anx/really-print-report-meta
 	  get-service-meta
 	  get-report-meta
