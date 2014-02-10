@@ -195,10 +195,10 @@
   (let loop ((res '()))
     (let ((token (next-token)))
       (cond
-       ((eqv? token 'close-brace) (list->vector (reverse res)))
+       ((eqv? token 'close-brace) (reverse res))
        (else (let* ((res (cons (parse-object-helper token) res))
                     (next (next-token)))
                (cond
-                ((eqv? next 'close-brace) (list->vector (reverse res)))
+                ((eqv? next 'close-brace) (reverse res))
                 ((eqv? next 'comma) (loop res))
                 (else (parse-error next)))))))))
