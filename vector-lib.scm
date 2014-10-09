@@ -1,4 +1,4 @@
-;;;;;; SRFI 43: Vector library -*- mode: scheme48 -*-
+;;;;;; SRFI 43: Vector library
 ;;;
 ;;; $Id: vector-lib.scm,v 1.7 2009/03/29 09:46:03 sperber Exp $
 ;;;
@@ -1270,3 +1270,5 @@
                 (error "erroneous value"
                        (list list? lst)
                        `(while calling ,reverse-list->vector)))))))))
+
+;; vector-lib.scm ends here

@@ -1,4 +1,4 @@
-;;; -*- mode: scheme48 -*-
+;;; packages.scm
 
 (define-interface anx-docgen-interface
   (export main
@@ -25,3 +25,5 @@
    json-parser
    vector-lib
    anx-docgen))
+
+;; packages.scm ends here

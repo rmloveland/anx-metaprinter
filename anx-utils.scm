@@ -1,4 +1,4 @@
-;;;; -*- mode: scheme48 -*-
+;;; anx-utils.scm -- Utilities used by the rest of the project.
 
 (define-syntax push!
   (syntax-rules ()
@@ -12,3 +12,5 @@
      (let ((result (car seq)))
        (begin (set! seq (cdr seq))
               result)))))
+
+;; anx-utils.scm ends here

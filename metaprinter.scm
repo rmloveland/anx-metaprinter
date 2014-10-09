@@ -1,4 +1,4 @@
-;;;; metaprinter.scm --- Print wiki tables from API responses. -*- Scheme48 -*-
+;;;; metaprinter.scm --- Print wiki tables from API responses.
 
 ;;--------------------------------------------------------------------
 ;; Part 1. Standard API Services
@@ -711,3 +711,5 @@ Prints its output to the *scratch* buffer."
       (begin (display "Usage: meta-printer SERVICE")
 	     (newline)
 	     128)))
+
+;; metaprinter.scm ends here

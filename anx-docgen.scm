@@ -1,4 +1,4 @@
-;;; -*- mode: scheme48 -*-
+;;; anx-docgen.scm -- Generate wiki tables from API services.
 
 ;;--------------------------------------------------------------------
 ;; Part 1. Standard API Services
@@ -447,3 +447,5 @@ Print the results to standard output."
       (begin (display "Usage: meta-printer SERVICE")
 	     (newline)
 	     128)))
+
+;;; anx-docgen.scm ends here

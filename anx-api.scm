@@ -1,4 +1,4 @@
-;;; -*- mode: scheme48 -*-
+;;; anx-api.scm -- Simple AppNexus API wrapper.
 
 (define *api-url* "http://api.appnexus.com/")
 (define *wd* (string-append (home-dir) "/bin/.metaprinter"))
@@ -86,3 +86,5 @@
   (cond ((string? x) x)
 	((symbol? x)
 	 (symbol->string x))))
+
+;;; anx-api.scm ends here

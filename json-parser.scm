@@ -1,4 +1,4 @@
-;;; -*- mode: scheme48 -*-
+;;; json-parser.scm --- A JSON parser for scsh.
 ;;; Original (c) Jörn Horstmann (http://blog.planetxml.de/)
 ;;; scsh translation and customizations (c) 2013 Rich Loveland
 
@@ -202,3 +202,5 @@
                 ((eqv? next 'close-brace) (reverse res))
                 ((eqv? next 'comma) (loop res))
                 (else (parse-error next)))))))))
+
+;; json-parser.scm ends here
