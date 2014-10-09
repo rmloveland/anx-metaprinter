@@ -1,0 +1,6 @@
+			 ANX Metaprinter TODO
+
+* GET-SERVICE-META should not go into an infinite loop if there's no
+  network access.
+
+* User should be able to to toggle sand and prod environments.
