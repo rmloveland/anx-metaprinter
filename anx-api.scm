@@ -2,10 +2,8 @@
 
 (define *api-url* "http://api.appnexus.com/")
 (define *wd* (string-append (home-dir) "/bin/.metaprinter"))
-(define *cache* (make-table))
 (define *logged-in* #f)
 (define *auth-timestamp* #f)
-(define *debug* #f)
 
 (define (logged-in?)
   (and *logged-in*
@@ -27,16 +25,6 @@
 	     (string=? (match:substring m) "\"status\":\"OK\""))
         #t
         #f)))
-
-(define (cache-clear!)
-  (table-walk (lambda (k v)
-		(table-set! *cache* k #f)) *cache*))
-
-(define (cache-ref k)
-  (table-ref *cache* k))
-
-(define (cache-set! k v)
-  (table-set! *cache* k v))
 
 (define (auth)
   (with-cwd *wd*
