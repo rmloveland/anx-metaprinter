@@ -1,29 +1,36 @@
-;;; packages.scm
+;;;; packages.scm
 
-(define-interface anx-docgen-interface
-  (export main
-	  anx/print-meta
-	  anx/really-print-meta
-	  anx/print-report-meta
-	  anx/really-print-report-meta
-	  get-service-meta
-	  get-report-meta
-	  anx/extract-report-meta-fields
-	  anx/extract-meta-fields
-	  vector-map
-	  vector-for-each))
+(define-structure anx-api anx-api-interface
+  (open scheme-with-scsh srfi-13)
+  (files anx-api))
+
+(define-structure anx-utils anx-utils-interface
+  (open scheme-with-scsh)
+  (files anx-utils))
 
 (define-structure anx-docgen anx-docgen-interface
-  (open
-   scheme-with-scsh
-   tables
-   srfi-1
-   srfi-13)  ;STRING-UPCASE, STRING-JOIN
-  (files
-   anx-api
-   anx-utils
-   json-parser
-   vector-lib
-   anx-docgen))
+  (open scheme-with-scsh
+	tables
+	srfi-1
+	srfi-13
+	anx-api
+	anx-utils
+	json-parser
+	vector-lib)  ; STRING-JOIN
+  (files anx-docgen))
 
-;; packages.scm ends here
+(define-structure vector-lib vector-lib-interface
+  (open scheme-with-scsh)
+  (files vector-lib))
+
+(define-structure json-parser json-parser-interface
+  (open scheme-with-scsh)
+  (files json-parser))
+
+(define-structure anx-metaprinter anx-metaprinter-interface
+  (open scheme-with-scsh
+	srfi-1
+	anx-docgen)
+  (files main))
+
+;;; eof
