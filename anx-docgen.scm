@@ -226,7 +226,7 @@ that need to be defined in their own tables."
   ;; -> IO State!
   "Generate API documentation from the service SYM.
 Prints to standard output."
-  (let ((meta (get-service-meta sym)))
+  (let ((meta (get-standard-meta sym)))
     (anx/print-meta (anx/extract-meta-fields meta))))
 
 ;;--------------------------------------------------------------------
@@ -436,16 +436,5 @@ necessary state."
 Print the results to standard output."
   (let ((meta (get-report-meta sym)))
     (anx/print-report-meta (anx/extract-report-meta-fields meta))))
-
-;;--------------------------------------------------------------------
-;; The actual command for CLI use.
-
-(define (main prog+args)
-  (if (>= (length prog+args) 2)
-      (begin (anx/really-print-meta (string->symbol (second prog+args)))
-	     0)
-      (begin (display "Usage: meta-printer SERVICE")
-	     (newline)
-	     128)))
 
 ;;; anx-docgen.scm ends here
