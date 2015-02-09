@@ -1,30 +1,57 @@
-ANX SCHEME HACKS
+AppNexus API "Metaprinter"
+==========================
 
-A.K.A., Scsh hacking for fun and profit.
+This command-line utility (installed as `metaprinter`) prints nicely
+formatted wiki tables for AppNexus API docs.  It does this by fetching
+the output of API service "meta" calls.
 
-Porting my Emacs Lisp code over to Scsh so that I can distribute
-little command-line apps to coworkers. Ideally they'll only have to
-type things like
+When provided with no arguments, it prints a help message like this:
 
-    $ print-meta 'publisher'
+    $ metaprinter
+    Usage: metaprinter --{std,rpt} SERVICE
 
-to output pre-formatted tables for our wiki docs.
+The `--std` flag means that you are trying to access a "standard" API
+service, such as the [Publisher Service](), e.g.:
 
-GETTING STARTED
+    $ metaprinter --std publisher
 
-First, create the directory ~/bin/metaprinter.
+The `--rpt` flag means that you want a table printed for a reporting
+API (one that lives under the [Reporting Service]()), e.g.:
 
-Then, create a file `auth' in that directory, which will hold your
+    $ metaprinter --rpt network_analytics
+
+
+INSTALLATION
+------------
+
+First, create the directory ~/bin/.metaprinter.
+
+Then, create a file `auth` in that directory, which will hold your
 JSON login credentials, e.g.,
 
-{
-    "auth": {
-        "password": "FOOBAR",
-        "username": "rloveland"
+    {
+        "auth": {
+            "password": "FOOBAR",
+            "username": "rloveland"
+        }
     }
-}
 
 After you save that file, change its permissions so no one else can read your password like so:
 
-$ chmod 600 auth
+    $ chmod 600 auth
 
+
+HACKING
+-------
+
+    ,config ,load /Users/rloveland/Code/mathoms/anx-metaprinter/interfaces.scm
+    ,config ,load /Users/rloveland/Code/mathoms/anx-metaprinter/packages.scm
+    ,open anx-metaprinter
+
+	Load structure anx-metaprinter (y/n)? y
+	[anx-api /Users/rloveland/Code/mathoms/anx-metaprinter/anx-api.scm]
+	[anx-utils /Users/rloveland/Code/mathoms/anx-metaprinter/anx-utils.scm]
+	[json-parser /Users/rloveland/Code/mathoms/anx-metaprinter/json-parser.scm]
+	[vector-lib /Users/rloveland/Code/mathoms/anx-metaprinter/vector-lib.scm]
+	[anx-docgen /Users/rloveland/Code/mathoms/anx-metaprinter/anx-docgen.scm]
+	[anx-metaprinter /Users/rloveland/Code/mathoms/anx-metaprinter/main.scm]
