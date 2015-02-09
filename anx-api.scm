@@ -52,51 +52,47 @@
   (update-sentinel!))
 
 (define (auth)
-  (with-cwd (install-directory)
-    (let* ((json (run/string (cat ,(api-auth-json))))
-	   (response (run/string (curl -b ,(api-cookie-file) 
-				       -c ,(api-cookie-file) 
-				       -s ; for "silent"
-				       -X POST
-				       -d ,json
-				       ,(string-append (api-url) "/auth")))))
-      (if (status-ok? response)
-	  (begin (set-logged-in!)
-		 (display response)
-		 (newline)
-		 #t)
-	  (begin (display response)
-		 (newline)
-		 #f)))))
+  (if (logged-in?)
+      0
+      (with-cwd (install-directory)
+	(let* ((json (run/string (cat ,(api-auth-json))))
+	       (response (run/string (curl -b ,(api-cookie-file) 
+					   -c ,(api-cookie-file) 
+					   -s ; for "silent"
+					   -X POST
+					   -d ,json
+					   ,(string-append (api-url) "/auth")))))
+	  (if (status-ok? response)
+	      (begin (set-logged-in!)
+		     (display response)
+		     (newline)
+		     #t)
+	      (begin (display response)
+		     (newline)
+		     #f))))))
 
 ;;; --------------------------------------------------------------------
 ;;; pulling the metas
 
-(define (get-service-meta service)
+(define (get-standard-meta service)
   (let ((the-service (safe-symbol->string service)))
-    (if (not (logged-in?))
-	(begin 
-	  (format #t "Have to log in again, just a moment...~%")
-	  (auth)
-	  (get-service-meta service))
-	(let ((str (with-cwd (install-directory)
-		     (run/string
-		      (curl -b ,(api-cookie-file)
-			    ,(string-append (api-url) "/" the-service "/meta?member_id=958"))))))
-	  str))))
+    (begin 
+      (auth)
+      (let ((json (with-cwd (install-directory)
+		   (run/string
+		    (curl -b ,(api-cookie-file)
+			  ,(string-append (api-url) "/" the-service "/meta?member_id=958"))))))
+	json))))
 
 (define (get-report-meta report)
   (let ((it (safe-symbol->string report)))
-    (if (not (logged-in?))
 	(begin 
-	  (format #t "Have to log in again, just a moment...~%")
 	  (auth)
-	       (get-report-meta report))
-	(let ((str (with-cwd (install-directory)
-		     (run/string
-		      (curl -b ,(api-cookie-file)
-			    ,(string-append (api-url) "/report?meta=" it "&member_id=958"))))))
-	  str))))
+	  (let ((json (with-cwd (install-directory)
+		       (run/string
+			(curl -b ,(api-cookie-file)
+			      ,(string-append (api-url) "/report?meta=" it "&member_id=958"))))))
+	    json))))
 
 ;; --------------------------------------------------------------------
 ;; helpers
