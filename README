@@ -24,10 +24,12 @@ API (one that lives under the [Reporting Service]()), e.g.:
 INSTALLATION
 ------------
 
-First, create the directory ~/bin/.metaprinter.
+First, create the directory `~/bin/.metaprinter` like so:
 
-Then, create a file `auth` in that directory, which will hold your
-JSON login credentials, e.g.,
+    $ mkdir -p ~/bin/.metaprinter
+
+Then, create a file called `auth` in the directory you've just
+created; that file will hold your JSON login credentials, e.g.,
 
     {
         "auth": {
@@ -36,7 +38,8 @@ JSON login credentials, e.g.,
         }
     }
 
-After you save that file, change its permissions so no one else can read your password like so:
+After you save your `auth` file, change its permissions so no one else
+can read your password like so:
 
     $ chmod 600 auth
 
