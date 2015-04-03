@@ -21,6 +21,6 @@
   (export json/parse-string))
 
 (define-interface anx-metaprinter-interface
-  (export main usage %main-helper))
+  (export main))
 
 ;;; eof
