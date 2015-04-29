@@ -1,6 +1,13 @@
-			 ANX Metaprinter TODO
+Dear Emacs, this is -*- Org -*- mode.
+#+title: TODO
 
-* GET-SERVICE-META should not go into an infinite loop if there's no
-  network access.
+* TODO =GET-SERVICE-META= should not go into an infinite loop if there's no network access.
 
-* User should be able to to toggle sand and prod environments.
+* TODO User should be able to to toggle sand and prod environments.
+
+  Design: instead of hard-coding a URL, let the user provide it in an
+  environment variable.
+
+* TODO Program should check whether sentinel file exists before querying it :bugs:
+
+  This causes crashes.
