@@ -13,7 +13,7 @@
 ;;; manage API URLs, cookies, and JSON authentication files
 
 (define (api-url)
-  "http://api.appnexus.com")
+  "https://api.appnexus.com")
 
 (define (api-cookie-file)
   (string-append (install-directory) "/cookies"))
@@ -30,11 +30,16 @@
 (define (sentinel)
   (string-append (install-directory) "/sentinel"))
 
+(define (create-sentinel)
+  (run (touch -t 2001010101 ,(sentinel))))
+
 (define (read-sentinel)
   (file-last-mod (sentinel)))
 
 (define (update-sentinel!)
   (run (touch ,(sentinel))))
+
+(define reset-sentinel create-sentinel)
 
 (define (sentinel-expired?)
   (> (time)
@@ -80,18 +85,26 @@
       (auth)
       (let ((json (with-cwd (install-directory)
 		   (run/string
-		    (curl -b ,(api-cookie-file)
-			  ,(string-append (api-url) "/" the-service "/meta?member_id=958"))))))
+		    (curl -b
+			  ,(api-cookie-file)
+			  ,(string-append (api-url)
+					  "/"
+					  the-service
+					  "/meta?member_id=958"))))))
 	json))))
 
 (define (get-report-meta report)
-  (let ((it (safe-symbol->string report)))
+  (let ((the-report (safe-symbol->string report)))
 	(begin 
 	  (auth)
 	  (let ((json (with-cwd (install-directory)
 		       (run/string
-			(curl -b ,(api-cookie-file)
-			      ,(string-append (api-url) "/report?meta=" it "&member_id=958"))))))
+			(curl -b
+			      ,(api-cookie-file)
+			      ,(string-append (api-url)
+					      "/report?meta="
+					      the-report
+					      "&member_id=958"))))))
 	    json))))
 
 ;; --------------------------------------------------------------------
