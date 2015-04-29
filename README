@@ -26,10 +26,11 @@ INSTALLATION
 
 First, create the directory `~/bin/.metaprinter` like so:
 
-    $ mkdir -p ~/bin/.metaprinter
+	$ mkdir -p ~/bin/.metaprinter && cd ~/bin/.metaprinter
+	$ touch auth.json
+	$ touch -t 200101010101 sentinel
 
-Then, create a file called `auth` in the directory you've just
-created; that file will hold your JSON login credentials, e.g.,
+Edit `auth.json` to hold your JSON login credentials, e.g.,
 
     {
         "auth": {
@@ -38,11 +39,35 @@ created; that file will hold your JSON login credentials, e.g.,
         }
     }
 
-After you save your `auth` file, change its permissions so no one else
-can read your password like so:
+After you save `auth.json`, change its permissions so no one else can
+read your password like so:
 
-    $ chmod 600 auth
+    $ chmod 600 auth.json
 
+Finally, you need to tell the tool which API endpoint you want by
+setting an environment variable like one of the following:
+
+    $ export ANX_API_URL="https://api.appnexus.com"
+    $ export ANX_API_URL="https://sand.api.appnexus.com"
+
+*Note: The ImpBus API is not supported by this tool, as it stubbornly
+ insists on printing its meta responses in a different format than the
+ Console API.*
+
+
+USAGE
+-----
+
+Assuming you have done everything shown in the **INSTALLATION**
+section (and a few things not shown there yet!), run it like so:
+
+    $ metaprinter
+    Usage: metaprinter --{std,rpt} SERVICE
+
+If you want to print out a wiki table for the Publisher Service docs, do:
+
+    $ metaprinter --std publisher
+    ... output and stuff ...
 
 HACKING
 -------
