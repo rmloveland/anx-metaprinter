@@ -222,11 +222,11 @@ that need to be defined in their own tables."
 	  (anx/print-children children)))
   (error "`anx/print-meta' expects a list of association lists")))
 
-(define (anx/really-print-meta sym)
+(define (anx/really-print-meta endpoint service)
   ;; -> IO State!
-  "Generate API documentation from the service SYM.
+  "Generate API documentation from the service SERVICE.
 Prints to standard output."
-  (let ((meta (get-standard-meta sym)))
+  (let ((meta (get-standard-meta endpoint service)))
     (anx/print-meta (anx/extract-meta-fields meta))))
 
 ;;--------------------------------------------------------------------
@@ -430,11 +430,11 @@ necessary state."
     (anx/print-metrics-table)
     (anx/clear-report-tables!)))
 
-(define (anx/really-print-report-meta sym)
+(define (anx/really-print-report-meta endpoint service)
   ;; -> IO State!
-  "Generate reporting API documentation from the service SYM.
+  "Generate reporting API documentation from the service SERVICE.
 Print the results to standard output."
-  (let ((meta (get-report-meta sym)))
+  (let ((meta (get-report-meta endpoint service)))
     (anx/print-report-meta (anx/extract-report-meta-fields meta))))
 
 ;;; anx-docgen.scm ends here

@@ -2,23 +2,28 @@ AppNexus API "Metaprinter"
 ==========================
 
 This command-line utility (installed as `metaprinter`) prints nicely
-formatted wiki tables for AppNexus API docs.  It does this by fetching
-the output of API service "meta" calls.
+formatted wiki tables for AppNexus Console API docs.  It does this by
+fetching the output of API service "meta" calls.
 
 When provided with no arguments, it prints a help message like this:
 
     $ metaprinter
-    Usage: metaprinter --{std,rpt} SERVICE
+    Usage: metaprinter --endpoint {sand,prod} --{std,rpt} SERVICE
+
+The `--endpoint` flag determines whether you're hitting the sand or
+production Console API.
+
+*Note: The ImpBus API is not supported yet.*
 
 The `--std` flag means that you are trying to access a "standard" API
 service, such as the [Publisher Service](), e.g.:
 
-    $ metaprinter --std publisher
+    $ metaprinter --endpoint sand --std publisher
 
 The `--rpt` flag means that you want a table printed for a reporting
 API (one that lives under the [Reporting Service]()), e.g.:
 
-    $ metaprinter --rpt network_analytics
+    $ metaprinter --endpoint prod --rpt network_analytics
 
 
 INSTALLATION
@@ -27,10 +32,15 @@ INSTALLATION
 First, create the directory `~/bin/.metaprinter` like so:
 
 	$ mkdir -p ~/bin/.metaprinter && cd ~/bin/.metaprinter
-	$ touch auth.json
-	$ touch -t 200101010101 sentinel
+	$ touch auth-prod.json
+	$ touch auth-sand.json
+	$ touch cookies.prod
+	$ touch cookies.sand
+	$ touch -t 200101010101 sentinel.prod
+	$ touch -t 200101010101 sentinel.sand
 
-Edit `auth.json` to hold your JSON login credentials, e.g.,
+Edit the `auth-*.json` files to hold your login credentials for each
+endpoint, e.g.,
 
     {
         "auth": {
@@ -39,35 +49,28 @@ Edit `auth.json` to hold your JSON login credentials, e.g.,
         }
     }
 
-After you save `auth.json`, change its permissions so no one else can
-read your password like so:
+After you save your `auth-*.json` files, change their permissions so
+no one else can read your passwords like so:
 
-    $ chmod 600 auth.json
-
-Finally, you need to tell the tool which API endpoint you want by
-setting an environment variable like one of the following:
-
-    $ export ANX_API_URL="https://api.appnexus.com"
-    $ export ANX_API_URL="https://sand.api.appnexus.com"
-
-*Note: The ImpBus API is not supported by this tool, as it stubbornly
- insists on printing its meta responses in a different format than the
- Console API.*
+    $ chmod 600 auth*
 
 
 USAGE
 -----
 
 Assuming you have done everything shown in the **INSTALLATION**
-section (and a few things not shown there yet!), run it like so:
+section (and a few things not shown there yet -- talk to
+[Rich Loveland](mailto:rloveland@appnexus.com)), you can run it like
+so:
 
     $ metaprinter
-    Usage: metaprinter --{std,rpt} SERVICE
+    Usage: metaprinter --endpoint {sand,prod} --{std,rpt} SERVICE
 
 If you want to print out a wiki table for the Publisher Service docs, do:
 
-    $ metaprinter --std publisher
-    ... output and stuff ...
+    $ metaprinter --endpoint sand --std publisher
+    ... table output ...
+
 
 HACKING
 -------
@@ -75,11 +78,3 @@ HACKING
     ,config ,load /Users/rloveland/Code/mathoms/anx-metaprinter/interfaces.scm
     ,config ,load /Users/rloveland/Code/mathoms/anx-metaprinter/packages.scm
     ,open anx-metaprinter
-
-	Load structure anx-metaprinter (y/n)? y
-	[anx-api /Users/rloveland/Code/mathoms/anx-metaprinter/anx-api.scm]
-	[anx-utils /Users/rloveland/Code/mathoms/anx-metaprinter/anx-utils.scm]
-	[json-parser /Users/rloveland/Code/mathoms/anx-metaprinter/json-parser.scm]
-	[vector-lib /Users/rloveland/Code/mathoms/anx-metaprinter/vector-lib.scm]
-	[anx-docgen /Users/rloveland/Code/mathoms/anx-metaprinter/anx-docgen.scm]
-	[anx-metaprinter /Users/rloveland/Code/mathoms/anx-metaprinter/main.scm]

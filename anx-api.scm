@@ -12,14 +12,18 @@
 ;;; --------------------------------------------------------------------
 ;;; manage API URLs, cookies, and JSON authentication files
 
-(define (api-url)
-  "https://api.appnexus.com")
+(define (api-url endpoint)
+  (cond ((string=? endpoint "prod")
+	 "https://api.appnexus.com")
+	((string=? endpoint "sand")
+	 "https://sand.api.appnexus.com")
+	(else (error "bad endpoint: " endpoint))))
 
-(define (api-cookie-file)
-  (string-append (install-directory) "/cookies"))
+(define (api-cookie-file endpoint)
+  (string-append (install-directory) "/cookies." endpoint))
 
-(define (api-auth-json)
-  (string-append (install-directory) "/auth.json"))
+(define (api-auth-json endpoint)
+  (string-append (install-directory) "/auth-" endpoint ".json"))
 
 ;;; --------------------------------------------------------------------
 ;;; sentinel files
@@ -27,48 +31,48 @@
 ;; use a sentinel file to determine whether we need to reauthenticate
 ;; with the API (2 hours)
 
-(define (sentinel)
-  (string-append (install-directory) "/sentinel"))
+(define (sentinel endpoint)
+  (string-append (install-directory) "/sentinel." endpoint))
 
-(define (create-sentinel)
-  (run (touch -t 2001010101 ,(sentinel))))
+(define (create-sentinel endpoint)
+  (run (touch -t 01010101 ,(sentinel endpoint))))
 
-(define (read-sentinel)
-  (file-last-mod (sentinel)))
+(define (read-sentinel endpoint)
+  (file-last-mod (sentinel endpoint)))
 
-(define (update-sentinel!)
-  (run (touch ,(sentinel))))
+(define (update-sentinel! endpoint)
+  (run (touch ,(sentinel endpoint))))
 
 (define reset-sentinel create-sentinel)
 
-(define (sentinel-expired?)
+(define (sentinel-expired? endpoint)
   (> (time)
-     (+ (file-last-mod (sentinel)) (* 60 120))))
+     (+ (file-last-mod (sentinel endpoint)) (* 60 120))))
 
 ;;; --------------------------------------------------------------------
 ;;; authentication logic
 
 ;; wrap sentinel helpers in nicer "words"
 
-(define (logged-in?)
-  (not (sentinel-expired?)))
+(define (logged-in? endpoint)
+  (not (sentinel-expired? endpoint)))
 
-(define (set-logged-in!)
-  (update-sentinel!))
+(define (set-logged-in! endpoint)
+  (update-sentinel! endpoint))
 
-(define (auth)
-  (if (logged-in?)
+(define (auth endpoint)
+  (if (logged-in? endpoint)
       0
       (with-cwd (install-directory)
-	(let* ((json (run/string (cat ,(api-auth-json))))
-	       (response (run/string (curl -b ,(api-cookie-file) 
-					   -c ,(api-cookie-file) 
+	(let* ((json (run/string (cat ,(api-auth-json endpoint))))
+	       (response (run/string (curl -b ,(api-cookie-file endpoint) 
+					   -c ,(api-cookie-file endpoint) 
 					   -s ; for "silent"
 					   -X POST
 					   -d ,json
-					   ,(string-append (api-url) "/auth")))))
+					   ,(string-append (api-url endpoint) "/auth")))))
 	  (if (status-ok? response)
-	      (begin (set-logged-in!)
+	      (begin (set-logged-in! endpoint)
 		     (display response)
 		     (newline)
 		     #t)
@@ -79,29 +83,29 @@
 ;;; --------------------------------------------------------------------
 ;;; pulling the metas
 
-(define (get-standard-meta service)
+(define (get-standard-meta endpoint service)
   (let ((the-service (safe-symbol->string service)))
-    (begin 
-      (auth)
+    (begin
+      (auth endpoint)
       (let ((json (with-cwd (install-directory)
 		   (run/string
 		    (curl -b
-			  ,(api-cookie-file)
-			  ,(string-append (api-url)
+			  ,(api-cookie-file endpoint)
+			  ,(string-append (api-url endpoint)
 					  "/"
 					  the-service
 					  "/meta?member_id=958"))))))
 	json))))
 
-(define (get-report-meta report)
+(define (get-report-meta endpoint report)
   (let ((the-report (safe-symbol->string report)))
 	(begin 
-	  (auth)
+	  (auth endpoint)
 	  (let ((json (with-cwd (install-directory)
 		       (run/string
 			(curl -b
-			      ,(api-cookie-file)
-			      ,(string-append (api-url)
+			      ,(api-cookie-file endpoint)
+			      ,(string-append (api-url endpoint)
 					      "/report?meta="
 					      the-report
 					      "&member_id=958"))))))
