@@ -1,13 +1,20 @@
 Dear Emacs, this is -*- Org -*- mode.
 #+title: TODO
 
-* TODO =GET-SERVICE-META= should not go into an infinite loop if there's no network access.
+* TODO Output should include name of service or report
 
-* TODO User should be able to to toggle sand and prod environments.
+  E.g., at it should at least begin by printing something like
+  "h1. Publisher".  It would probably be too annoying to code up all
+  the naming special cases to do it properly.
 
-  Design: instead of hard-coding a URL, let the user provide it in an
-  environment variable.
-
-* TODO Program should check whether sentinel file exists before querying it :bugs:
+* TODO Program should check whether sentinel file exists before querying it
 
   This causes crashes.
+
+* TODO Don't print the stupid heap size message
+
+  This is the one:
+
+  #+BEGIN_QUOTE
+  heap size 5000000 is too small, using 5198884
+  #+END_QUOTE
