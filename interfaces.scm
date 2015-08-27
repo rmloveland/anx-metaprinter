@@ -11,8 +11,7 @@
 
 (define-interface anx-docgen-interface
   (export anx/print-meta
-	  anx/really-print-meta
-	  anx/really-print-report-meta))
+	  anx/extract-meta-fields))
 
 (define-interface vector-lib-interface
   (export vector-for-each))

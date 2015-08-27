@@ -1,9 +1,5 @@
 ;;;; packages.scm
 
-(define-structure anx-api anx-api-interface
-  (open scheme-with-scsh srfi-13)
-  (files anx-api))
-
 (define-structure anx-utils anx-utils-interface
   (open scheme-with-scsh)
   (files anx-utils))
@@ -13,7 +9,6 @@
 	tables
 	srfi-1
 	srfi-13
-	anx-api
 	anx-utils
 	json-parser
 	vector-lib)  ; STRING-JOIN
