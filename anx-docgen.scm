@@ -92,8 +92,7 @@ that need to be defined in their own tables."
 	   *anx-standard-table-header*)
      (cons 'rows
 	    (map (lambda (object)
-			  ;; Nothing should have fields at this level (I hope).
-		   (anx/alistify-object object))
+		   (anx/process-object object))
 		 alists)))))
 
 (define (anx/process-stack-items!)
